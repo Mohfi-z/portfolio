@@ -475,7 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Télécharger le CV au clic
         document.getElementById("download-cv").addEventListener("click", function () {
-            window.open("images/CV.pdf", "_blank");
+            window.open("https://drive.google.com/file/d/1mCH4F_32gosdeWtPYyvaDiibQk-hniSu/view?usp=sharing", "_blank");
         });
 
         // Fermer la boîte si l'utilisateur clique en dehors du contenu
