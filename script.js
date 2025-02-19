@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Simulation d'un chargement de 2 secondes
   setTimeout(() => {
       hideLoader();
-  }, 150);
+  }, 1500);
 });
 
 // =========================================
