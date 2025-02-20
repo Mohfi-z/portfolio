@@ -1083,7 +1083,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // =========================================
 // * Curseur
 // =========================================
-
 document.addEventListener("DOMContentLoaded", function () {
     const body = document.body;
     let particles = [];
@@ -1116,10 +1115,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // =========================================
-// * Bouton 
+// * Bouton Modals
 // =========================================
-
-/*Sidebar*/
 document.addEventListener("DOMContentLoaded", function () {
   const profileName = document.getElementById("profile-name");
 
@@ -1158,7 +1155,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-/*BTS SIO */
+// =========================================
+// * Bouton 
+// =========================================
 document.addEventListener('DOMContentLoaded', function() {
   const btnClassique = document.getElementById('btn-classique');
   const btnSISR = document.getElementById('btn-sisr');
