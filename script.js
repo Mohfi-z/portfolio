@@ -1356,7 +1356,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // 🎶 Création de la playlist "Tout" (contient toutes les musiques)
   const allTracks = [];
   Object.values(playlists).forEach(tracks => allTracks.push(...tracks));
-  playlists["All"] = allTracks;
 
   // 🏷️ Ajout des playlists au menu déroulant
   Object.keys(playlists).forEach(playlist => {
