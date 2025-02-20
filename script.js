@@ -1335,22 +1335,22 @@ document.addEventListener("DOMContentLoaded", function () {
           { title: "Chill Vibes", image: "images/Soundbox/lofi/lofiboy.jpg", src: "sounds/Lofi/good-night-lofi-cozy-chill-music-160166.mp3" }
       ],
       "Dofus": [
-        { title: "Lofi Relax", image: "images/Soundbox/dofus/images.jpg", src: "sounds/dofus/01. Dofus Ouverture.mp3" }
+        { title: "Dofus", image: "images/Soundbox/dofus/images.jpg", src: "sounds/dofus/01. Dofus Ouverture.mp3" }
     ],
     "Hunter X Hunter": [
-      { title: "Lofi Relax", image: "images/Soundbox/Hunter x hunter/aa58e072336a5c746dd4e361a6ff4ae808abf7efeaa5bfe6986f4c3eac601421.jpg", src: "sounds/Hunter x hunter/Hunter x hunter Ending 1 - Just awake_default.mp3" },
-      { title: "Chill Vibes", image: "images/Soundbox/Hunter x hunter/Famille-Zoldyck-hxh.jpg", src: "sounds/Hunter x hunter/hunter-x-hunter_zoldyck-family.mp3" }
+      { title: "Hunter x Hunter Themes", image: "images/Soundbox/Hunter x hunter/aa58e072336a5c746dd4e361a6ff4ae808abf7efeaa5bfe6986f4c3eac601421.jpg", src: "sounds/Hunter x hunter/Hunter x hunter Ending 1 - Just awake_default.mp3" },
+      { title: "Zoldick Themes", image: "images/Soundbox/Hunter x hunter/Famille-Zoldyck-hxh.jpg", src: "sounds/Hunter x hunter/hunter-x-hunter_zoldyck-family.mp3" }
   ],
   "Minecraft": [
-    { title: "Lofi Relax", image: "images/Soundbox/Minecraft/2x1_NSwitch_Minecraft_image1600w.jpg", src:"sounds/Minecraft/1-08. Minecraft.mp3"},
-    { title: "Chill Vibes", image: "images/Soundbox/Minecraft/raw.jpg", src:"sounds/Minecraft/1-01. Key.mp3" }
+    { title: "Minecraft - default", image: "images/Soundbox/Minecraft/2x1_NSwitch_Minecraft_image1600w.jpg", src:"sounds/Minecraft/1-08. Minecraft.mp3"},
+    { title: "Minecraft - key", image: "images/Soundbox/Minecraft/raw.jpg", src:"sounds/Minecraft/1-01. Key.mp3" }
 ],
 "Overlord": [
-  { title: "Lofi Relax", image: "images/Soundbox/Overlord/1010x505-017.png", src: "sounds/Overlord/VORACITY (osanime.com).mp3" }
+  { title: "Voracity", image: "images/Soundbox/Overlord/1010x505-017.png", src: "sounds/Overlord/VORACITY (osanime.com).mp3" }
 ],
 "Paper Mario": [
-  { title: "Lofi Relax", image: "images/Soundbox/Paper Mario/hqdefault.jpg", src: "sounds/Paper Mario/01. Story of the Stolen Spirits.mp3" },
-  { title: "Chill Vibes", image: "images/Soundbox/Paper Mario/paper-mario--la-porte-millnaire-17-1300x400.jpg", src: "sounds/Paper Mario/03. File Select.mp3" }
+  { title: "Paper mario Stolen spirit", image: "images/Soundbox/Paper Mario/hqdefault.jpg", src: "sounds/Paper Mario/01. Story of the Stolen Spirits.mp3" },
+  { title: "Paper Mario - 03", image: "images/Soundbox/Paper Mario/paper-mario--la-porte-millnaire-17-1300x400.jpg", src: "sounds/Paper Mario/03. File Select.mp3" }
 ],
   };
 
