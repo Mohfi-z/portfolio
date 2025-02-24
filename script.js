@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   console.log("Conteneur des particules trouvé, génération des particules...");
 
-  const maxParticles = 50; // Limite stricte du nombre de particules
+  const maxParticles = 10; // Limite stricte du nombre de particules
   let activeParticles = 0;
   let lockedParticles = new Set();
 
@@ -270,66 +270,25 @@ document.addEventListener("DOMContentLoaded", function () {
 // * Animation Skills
 // =========================================
 document.addEventListener("DOMContentLoaded", function () {
-    const skillBars = document.querySelectorAll(".skill-fill");
+  const skillCards = document.querySelectorAll(".skill-card-container");
 
-    // Fonction pour charger les barres de progression lors du scroll
-    function checkScroll() {
-        skillBars.forEach((bar) => {
-            const rect = bar.getBoundingClientRect();
-            if (rect.top < window.innerHeight - 50) {
-                const skillLevel = bar.getAttribute("data-skill");
-                bar.style.width = skillLevel + "%";
-            }
-        });
-    }
+  skillCards.forEach((card) => {
+      card.addEventListener("click", function () {
+          const skillCard = this.querySelector(".skill-card");
+          skillCard.classList.toggle("flipped");
 
-    window.addEventListener("scroll", checkScroll);
-    checkScroll(); // Vérifier au chargement
-
-    // Gestion des particules Nen
-    let particleTimeout;
-
-    document.addEventListener("mousemove", (e) => {
-        if (particleTimeout) return;
-
-        const particle = document.createElement("div");
-        particle.className = "nen-particle";
-        document.body.appendChild(particle);
-
-        // Position des particules
-        particle.style.left = `${e.clientX}px`;
-        particle.style.top = `${e.clientY}px`;
-
-        // Supprimer après animation
-        setTimeout(() => {
-            particle.remove();
-        }, 800);
-
-        // Limiter la fréquence des particules
-        particleTimeout = setTimeout(() => {
-            particleTimeout = null;
-        }, 100);
-    });
-
-    // Ajout de l'effet de flip au clic sur les cartes
-    const skillCards = document.querySelectorAll(".skill-card-container");
-
-    skillCards.forEach((card) => {
-        card.addEventListener("click", function () {
-            const skillCard = this.querySelector(".skill-card");
-            skillCard.classList.toggle("flipped");
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-  document.querySelectorAll(".skill-fill").forEach(bar => {
-    let width = bar.getAttribute("style").match(/width:\s*(\d+)%/)[1];
-    bar.style.width = "0%"; // Reset avant l'animation
-    setTimeout(() => {
-      bar.style.width = width + "%";
-      bar.setAttribute("data-percent", width); // Mise à jour du pourcentage
-    }, 500);
+          // Réinitialiser l'animation avant de la rejouer
+          const skillBars = skillCard.querySelectorAll(".skill-fill");
+          skillBars.forEach((bar) => {
+              bar.style.transition = "none"; // Supprime la transition pour reset
+              bar.style.width = "0%"; // Réinitialisation
+              setTimeout(() => {
+                  bar.style.transition = "width 1.5s ease-in-out"; // Réactive la transition
+                  const skillLevel = bar.getAttribute("data-skill") || bar.getAttribute("data-percent");
+                  bar.style.width = skillLevel + "%"; // Anime la barre
+              }, 50); // Petit délai pour forcer la réinitialisation
+          });
+      });
   });
 });
 
@@ -1085,7 +1044,6 @@ document.addEventListener("DOMContentLoaded", function () {
   showSlide(slideIndex);
 });
 
-
 // =========================================
 // * Curseur
 // =========================================
@@ -1209,10 +1167,10 @@ document.addEventListener('DOMContentLoaded', function() {
     </table>
     <h3>🎯 Objectifs du BTS SIO</h3>
     <ul>
-      <li>✅ Acquérir une expertise en informatique (réseaux ou développement)</li>
-      <li>✅ Être capable de gérer des infrastructures IT ou concevoir des logiciels</li>
-      <li>✅ Travailler en équipe sur des projets informatiques concrets</li>
-      <li>✅ Développer une approche sécurisée et optimisée des systèmes</li>
+      <li> Acquérir une expertise en informatique (réseaux ou développement)</li>
+      <li> Être capable de gérer des infrastructures IT ou concevoir des logiciels</li>
+      <li> Travailler en équipe sur des projets informatiques concrets</li>
+      <li> Développer une approche sécurisée et optimisée des systèmes</li>
     </ul>
     <h3>📚 Matières enseignées</h3>
     <ul>
@@ -1242,10 +1200,10 @@ document.addEventListener('DOMContentLoaded', function() {
     </ul>
     <h3>🎯 Objectifs SISR</h3>
     <ul>
-      <li>✅ Maîtriser l'administration des infrastructures IT</li>
-      <li>✅ Assurer la sécurité et la continuité des services</li>
-      <li>✅ Gérer les incidents et réaliser des diagnostics</li>
-      <li>✅ Optimiser la performance des systèmes</li>
+      <li> Maîtriser l'administration des infrastructures IT</li>
+      <li> Assurer la sécurité et la continuité des services</li>
+      <li> Gérer les incidents et réaliser des diagnostics</li>
+      <li> Optimiser la performance des systèmes</li>
     </ul>
     <h3>📚 Matières enseignées en SISR</h3>
     <ul>
@@ -1274,10 +1232,10 @@ document.addEventListener('DOMContentLoaded', function() {
     </ul>
     <h3>🎯 Objectifs SLAM</h3>
     <ul>
-      <li>✅ Maîtriser le développement d'applications</li>
-      <li>✅ Concevoir des solutions logicielles innovantes</li>
-      <li>✅ Gérer des projets de développement en équipe</li>
-      <li>✅ Optimiser la performance et la sécurité des applications</li>
+      <li> Maîtriser le développement d'applications</li>
+      <li> Concevoir des solutions logicielles innovantes</li>
+      <li> Gérer des projets de développement en équipe</li>
+      <li> Optimiser la performance et la sécurité des applications</li>
     </ul>
     <h3>📚 Matières enseignées en SLAM</h3>
     <ul>
