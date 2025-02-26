@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <!-- ===================== MÉTADONNÉES ===================== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Mehdi EL MENSI</title>
+    <link rel="shortcut icon" type="image/png" href="images/pp.png"/>
+    <!-- ===================== LIENS CSS ===================== -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/minecraft" rel="stylesheet">
+</head>
+
+<body>
+  <!-- ===================== BOÎTE À MUSIQUE ===================== -->
+  <div class="music-widget">
+    <div class="music-icon">🎵</div>
+    <div class="music-box">
+        <div id="particles"></div>
+        <img id="current-track-image" src="images/Soundbox/lofi/lofigirl.jpg" alt="Track Image" class="track-image">
+        <!-- Sélecteur de playlist -->
+<div id="playlist-container">
+  <label for="playlist-select">🎵 Playlist :</label>
+  <select id="playlist-select">
+      <option value="all">All</option>
+  </select>
+</div>
+        <p id="current-track-name">Lecture : Lofi Relax</p>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+            <div id="time-display">00:00 / 00:00</div>
+        </div>
+        <table class="music-container">
+            <tr>
+                <td colspan="3">
+                    <audio id="background-music" controls loop>
+                        <source id="audio-source" src="sounds/Lofi/lofi-295209.mp3" type="audio/mp3">
+                        Votre navigateur ne supporte pas l'élément audio.
+                    </audio>
+                </td>
+            </tr>
+            <tr class="music-controls">
+                <td><button id="prev-music">⏮</button></td>
+                <td><button id="play-pause-music">🎵</button></td>
+                <td><button id="next-music">⏭</button></td>
+            </tr>
+        </table>
+    </div>
+  </div>
+
+  <!-- ===================== EFFET DE PARTICULES ===================== -->
+  <div class="particles-background"></div>
+
+  <!-- ===================== LOADER DYNAMIQUE ===================== -->
+  <div class="loader-wrapper">
+        <img src="images/load.gif" alt="Chargement..." class="loading-gif">
+  </div>
+
+  <!-- ===================== BOUTON DE BASCULE SIDEBAR ===================== -->
+  <button id="toggle-sidebar" class="toggle-sidebar-btn">
+      <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- ===================== SIDEBAR ===================== -->
+ <aside class="sidebar">
+      <div class="profile">
+        <img id="profile-image" src="images/g_la_flemme.gif" alt="Photo de profil">
+        <h1 id="profile-name" class="clickable-text">Mehdi El MENSI</h1>
+        <p id="bts-sio-text">BTS SIO - SISR</p>
+        <div id="virus-game" class="game-container">
+          <h2>🦠 Évite les virus !</h2>
+          <div id="game-area">
+            <p id="game-timer">Temps restant : <span id="timer">10</span> sec</p>
+            <p id="game-message"></p>
+          </div>
+          <button id="restart-game" style="display:none;">Rejouer</button>
+          <button id="quit-game">Quitter</button>
+        </div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#hero"><i class="fas fa-home"></i> Accueil</a></li>
+          <li><a href="#about"><i class="fa-solid fa-user-tie"></i> Profil</a></li>
+          <li><a href="#bts-sio"><i class="fas fa-school"></i> BTS SIO</a></li>
+          <li><a href="#parcours"><i class="fas fa-graduation-cap"></i> Parcours</a></li>
+          <li><a href="#stages"><i class="fas fa-briefcase"></i> Stages</a></li>
+          <li><a href="#skills"><i class="fas fa-desktop"></i> Compétences</a></li>
+          <li><a href="#projects"><i class="fa-solid fa-diagram-project"></i> Projets</a></li>
+          <li><a href="#veille"><i class="fas fa-lightbulb"></i> Veille</a></li>
+          <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+        </ul>
+      </nav>   
+  </aside>
+  <!-- ===================== HERO ===================== -->
+  <div id="hero" class="hero-section">
+        <div class="hero-container">
+          <h1>
+            <span>M</span>
+            <span>E</span>
+            <span>H</span>
+            <span>D</span>
+            <span>I</span>
+            <span>&nbsp;</span>
+            <span>-</span>
+            <span>&nbsp;</span>
+            <span>E</span>
+            <span>L</span>
+            <span>&nbsp;</span>
+            <span>M</span>
+            <span>E</span>
+            <span>N</span>
+            <span>S</span>
+            <span>I</span>
+          </h1>
+          <p>Étudiant en BTS SIO – Option SISR</p>
+          <div class="particles"></div>
+        </div>
+  </div>
+
+<!-- ===================== SECTION À PROPOS ===================== -->
+<section id="about" class="about section">
+  <div class="container">
+      <img src="images/Maskass about.gif" class="section-icon" alt="À propos">
+      <h2>📌 À PROPOS DE MOI</h2>
+      <p>
+          Je suis étudiant en <strong>deuxième année de BTS SIO</strong> (Services Informatiques aux Organisations), spécialité 
+          <strong>SISR</strong> (Solutions d'Infrastructure, Systèmes et Réseaux) au 
+          <a href="https://www.eiffel-bordeaux.org/" target="_blank">Lycée Gustave Eiffel de Bordeaux</a>.  
+          Passionné par l’informatique et curieux des nouvelles technologies, j’ai naturellement choisi cette voie après 
+          l’obtention de mon <strong>BAC PRO SN</strong>.
+      </p>
+
+      <!-- Conteneur du CV -->
+      <div class="cv-container">
+          <iframe src="https://drive.google.com/file/d/1CrxJKAtYkZLZzqO3fiM0OlGwdbEo6hk8/preview" class="cv-preview"></iframe>
+
+          <div class="cv-buttons">
+              <a href="https://drive.google.com/file/d/1CrxJKAtYkZLZzqO3fiM0OlGwdbEo6hk8/view?usp=sharing" target="_blank" class="cv-download">
+                  📥 Télécharger le CV
+              </a>
+              <a href="/images/Lettre de motivation.html" target="_blank" class="lm-download">
+                📥 Génerer la lettre de motivation
+            </a>
+          </div>
+      </div>
+  </div>
+</section>
+      
+  <!-- ===================== SECTION BTS SIO ===================== -->
+  <section id="bts-sio" class="bts-sio section">
+    <div class="container">
+      <img src="images/BTS SIO.png" class="section-icon" alt="BTS SIO">
+      <h2>🎓 BTS SIO - Services Informatiques aux Organisations</h2>
+      
+      <!-- Mode Buttons -->
+      <div class="mode-buttons">
+        <button id="btn-classique" class="mode-btn active">Comparatif</button>
+        <button id="btn-sisr" class="mode-btn">SISR</button>
+        <button id="btn-slam" class="mode-btn">SLAM</button>
+      </div>
+      
+      <!-- Content Container -->
+      <div id="bts-content">
+        <p>
+          Le BTS Services Informatiques aux Organisations (<strong class="txtsio">SIO</strong>) est un diplôme Bac+2 destiné à former des professionnels de l'informatique.  
+          Cette formation permet d’acquérir des compétences en administration des systèmes et réseaux (<strong class="txtsisr">SISR</strong>) ou en développement d’applications (<strong class="txtslam">SLAM</strong>).
+        </p>
+
+        <h3>📊 Comparatif des Deux Options</h3>
+        <table class="bts-table">
+          <thead>
+            <tr>
+              <th>🖥️ SISR (Systèmes & Réseaux)</th>
+              <th>💻 SLAM (Développement Logiciel)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🔹 Administration des serveurs et réseaux</td>
+              <td>🔹 Développement d'applications (Web, mobile, logiciel)</td>
+            </tr>
+            <tr>
+              <td>🔹 Sécurité informatique et cybersécurité</td>
+              <td>🔹 Bases de données et SQL</td>
+            </tr>
+            <tr>
+              <td>🔹 Maintenance et support technique</td>
+              <td>🔹 Programmation en divers langages (Java, Python, PHP...)</td>
+            </tr>
+            <tr>
+              <td>🔹 Virtualisation et Cloud Computing</td>
+              <td>🔹 Gestion de projet en méthode Agile</td>
+            </tr>
+            <tr>
+              <td>🎯 Objectif : Administrer et sécuriser les infrastructures IT</td>
+              <td>🎯 Objectif : Concevoir, coder et optimiser des logiciels</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>🎯 Objectifs du BTS SIO</h3>
+        <ul>
+          <li> Acquérir une expertise en informatique (réseaux ou développement)</li>
+          <li> Être capable de gérer des infrastructures IT ou concevoir des logiciels</li>
+          <li> Travailler en équipe sur des projets informatiques concrets</li>
+          <li> Développer une approche sécurisée et optimisée des systèmes</li>
+        </ul>
+
+        <h3>📚 Matières enseignées</h3>
+        <ul>
+          <li>🖥️ Systèmes et réseaux : Windows Server, Linux, Cisco</li>
+          <li>💻 Développement : HTML, CSS, JavaScript, PHP, Python, SQL</li>
+          <li>🛡️ Sécurité informatique et cybersécurité</li>
+          <li>📊 Gestion de projet (Méthodologie Agile, Scrum)</li>
+          <li>🌍 Anglais technique & Communication professionnelle</li>
+        </ul>
+
+        <p>
+          Pendant ma formation en option SISR, j’ai acquis des compétences en administration de serveurs, gestion de la sécurité des réseaux et support technique.  
+          Mes stages m’ont permis de mettre en pratique ces connaissances dans un environnement professionnel.
+        </p>
+      </div>
+    </div>
+  </section>
+  <!-- ===================== SECTION PARCOURS ===================== -->
+<section id="parcours" class="parcours section">
+  <div class="container">
+    <img src="images/Logo-Dofus.png" class="section-icon" alt="Dofus">
+    <h2 class="title-dofus">🎓 Mon Parcours</h2>
+    <!-- Boutons de navigation -->
+<div class="slider-navigation">
+  <button class="prev"><i class="fas fa-chevron-left"></i></button>
+  <button class="next"><i class="fas fa-chevron-right"></i></button>
+</div>
+
+    <!-- Slider Container -->
+    <div class="slider-container">
+      <div class="slider">
+
+        <!-- Slide 1 - BAC PRO SN -->
+        <div class="slide active">
+          <h3>📅 2021 - 2023 : BAC PRO SN</h3>
+          <p>
+            J’ai débuté mon parcours avec un <strong>BAC PRO SN</strong> (Systèmes Numériques), où j’ai acquis des bases solides en :
+          </p>
+          <ul>
+            <li>🔹 Administration réseau : <em>IPV4, DNS, DHCP, VLAN, Cisco, Routage</em></li>
+            <li>🔹 Architecture réseau (Projet MTPeinture)</li>
+          </ul>
+        </div>
+
+        <!-- Slide 2 - Stage Discomputer -->
+        <div class="slide">
+          <h3>📅 2022 : Stage - Discomputer</h3>
+          <p>
+            J’ai effectué un stage chez <strong>Discomputer</strong>, où j’ai travaillé sur :
+          </p>
+          <ul>
+            <li>🛠 Réparation hardware & software</li>
+            <li>🛒 Vente et conseil client</li>
+            <li>💻 Utilisation d'outils informatiques spécialisés</li>
+          </ul>
+        </div>
+
+        <!-- Slide 3 - Stage EGS -->
+        <div class="slide">
+          <h3>📅 2022 : Stage - EGS</h3>
+          <p>
+            Expérience dans le développement web chez <strong>EGS</strong>, où j’ai appris :
+          </p>
+          <ul>
+            <li>🌐 Bases du développement web : <em>HTML, CSS</em></li>
+          </ul>
+        </div>
+
+        <!-- Slide 4 - BTS SIO SISR -->
+        <div class="slide">
+          <h3>📅 2023 - 2025 : BTS SIO (SISR)</h3>
+          <p>
+            Actuellement en <strong>BTS SIO</strong> (option <strong>SISR</strong>), je me spécialise en :
+          </p>
+          <ul>
+            <li>⚙️ Administration des systèmes & réseaux</li>
+            <li>🔒 Cybersécurité</li>
+            <li>🔄 Virtualisation et gestion des services</li>
+          </ul>
+        </div>
+
+        <!-- Slide 5 - Expériences en Entreprise -->
+        <div class="slide">
+          <h3>📅 2023 - Aujourd'hui : Expériences Professionnelles</h3>
+          <p>
+            J’ai acquis de l’expérience dans plusieurs entreprises, notamment :
+          </p>
+          <ul>
+            <li>🏢 <strong>R2 Micro & ISI Group</strong> : Voir <a href="#stages">SECTION STAGE</a> pour plus de détails.</li>
+          </ul>
+        </div>
+
+      </div>
+      <!-- Pagination dots -->
+      <div class="slider-pagination"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== SECTION STAGES ===================== -->
+  <section id="stages" class="stages section">
+        <div class="container">
+          <img src="images/Minecraft-Logo.png" class="section-icon" alt="STAGES">
+          <h2>💼 Mes Stages</h2>
+          <p>
+            Dans le cadre de ma formation en BTS SIO, j’ai eu l’opportunité de réaliser plusieurs stages en entreprise, 
+            me permettant d’acquérir une précieuse expérience dans les domaines de l’administration système et des réseaux.
+            Voici un aperçu de mes missions et réalisations !
+          </p>
+
+          <div class="stage-list">
+            <!-- Stage 1 -->
+            <div class="stage" data-block-id="1">
+              <div class="profile">
+                <img src="images/stage1-admin.jpg" alt="Administration des systèmes">
+              </div>
+              <h3>🖥️ Stage 1 : Administration des Systèmes</h3>
+              <p><strong>📅 Durée :</strong> 1 mois</p>
+              <p><strong>🏢 Entreprise :</strong> R2Micro</p>
+              <p><strong>🚀 Missions :</strong></p>
+              <ul>
+                <li>🔧 Gestion et maintenance des serveurs Windows et Linux</li>
+                <li>🔑 Administration des comptes utilisateurs et droits d'accès</li>
+                <li>🛡️ Mise en place de solutions de cybersécurité</li>
+                <li>📂 Sauvegarde et récupération des données critiques</li>
+              </ul>
+              <p><strong>📝 Compétences acquises :</strong> Gestion Active Directory, Sécurité réseau, Virtualisation</p>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="stage" data-block-id="2">
+              <div class="profile">
+                <!-- img src="images/stage2-reseau.jpg" alt="Support réseau" -->
+
+                          <!-- IMG ISI GROUP SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="400" height="120" viewBox="0 0 200 60">
+                  <circle style="stroke:#243c86;stroke-width:4;fill:none" cx="29.95" cy="29.95" r="27.5"/>
+                  <circle style="stroke:#000;stroke-width:0.4;fill:none" cx="29.95" cy="29.95" r="25.5"/>
+                  <g transform="scale(1.1 1.2) translate(-2.5 -2.5)">
+                  <path style="stroke:none;fill:#243c86" d="m44.55 37.49c-2.45 0 -3.68 -1.34 -3.68 -4.03V16.74c2.45 0 3.68 1.33 3.68 3.99z
+                  m-5.21 -6.41c0 1.75 -0.4 3.24 -1.19 4.47 -0.86 1.29 -1.94 1.93 -3.25 1.93h-13.6c0 -3.22 1.31 -4.84 3.92 -4.84h9.68c0.51 0 0.77 -0.52 0.77 -1.57 0 -1.05 -0.25 -1.57 -0.77 -1.57h-9.89c-1.31 0 -2.39 -0.64 -3.25 -1.93 -0.82 -1.21 -1.22 -2.69 -1.22 -4.43 0 -1.75 0.42 -3.25 1.26 -4.51 0.84 -1.26 1.91 -1.89 3.22 -1.89h13.6c0 3.22 -1.15 4.84 -3.46 4.84H25.01c-0.51 0 -0.77 0.52 -0.77 1.57 0 1.02 0.25 1.53 0.77 1.53h9.89c1.31 0 2.39 0.64 3.25 1.93 0.8 1.24 1.19 2.73 1.19 4.47m-20.34 6.41c-2.45 0 -3.68 -1.34 -3.68 -4.03V16.74c2.45 0 3.68 1.33 3.68 3.99z"/>
+                  </g>
+                  <g transform="scale(4.2) translate(19.5 2.9)">
+                  <path style="stroke:none;fill:#243c86" d="m12.54 2.67c0.25 0.3 0.38 0.78 0.38 1.45 0 0.67 -0.13 1.15 -0.38 1.44 -0.26 0.3 -0.66 0.44 -1.22 0.44h-0.79c-0.57 0 -0.98 -0.15 -1.23 -0.44 -0.25 -0.29 -0.38 -0.77 -0.38 -1.44 0 -0.67 0.13 -1.16 0.38 -1.46 0.25 -0.3 0.66 -0.45 1.23 -0.45h0.79c0.56 0 0.97 0.15 1.22 0.45m-11.92 -1.45c-1.82 0 -2.59 -0.06 -3.22 0.08 -0.46 0.11 -0.83 0.32 -1.13 0.63 -0.45 0.48 -0.68 1.21 -0.68 2.19 0 0.98 0.23 1.7 0.68 2.18 0.45 0.48 1.1 0.72 1.95 0.72h0.9c0.33 0 0.61 -0.05 0.83 -0.14 0.23 -0.09 0.41 -0.22 0.56 -0.39 0.15 -0.16 0.25 -0.36 0.32 -0.58 0.07 -0.22 0.1 -0.46 0.1 -0.71 0 -0.51 -0.13 -0.91 -0.38 -1.2 -0.25 -0.3 -0.64 -0.44 -1.16 -0.44h-1.4v0.89h1.29c0.24 0 0.42 0.06 0.54 0.19 0.12 0.13 0.17 0.31 0.17 0.55 0 0.24 -0.06 0.44 -0.19 0.59 -0.13 0.15 -0.33 0.23 -0.62 0.23h-0.96c-0.57 0 -0.98 -0.15 -1.23 -0.44 -0.25 -0.3 -0.38 -0.78 -0.38 -1.44 0 -0.67 0.13 -1.16 0.38 -1.45 0.25 -0.3 0.66 -0.44 1.23 -0.44h2.4v-0.93c0 0 0 -0.01 0 -0.08m1.45 0v1.01h3.19c0.28 0 0.49 0.08 0.62 0.23 0.13 0.15 0.19 0.33 0.19 0.54 0 0.1 -0.02 0.2 -0.05 0.3 -0.03 0.1 -0.08 0.18 -0.14 0.26 -0.06 0.07 -0.14 0.14 -0.25 0.18 -0.1 0.05 -0.23 0.07 -0.37 0.07h-2.27c-0.32 0 -0.55 0.07 -0.7 0.21 -0.14 0.14 -0.21 0.38 -0.21 0.71v2.3h1.02v-2.1c0 -0.1 0.05 -0.15 0.15 -0.15h1.52l1.33 2.25h1.13l-1.35 -2.33c0.22 -0.06 0.41 -0.16 0.57 -0.28 0.15 -0.12 0.28 -0.26 0.38 -0.42 0.09 -0.16 0.17 -0.33 0.21 -0.51 0.05 -0.18 0.07 -0.36 0.07 -0.55 0 -0.23 -0.04 -0.45 -0.11 -0.66 -0.07 -0.21 -0.18 -0.4 -0.34 -0.56 -0.15 -0.16 -0.35 -0.29 -0.58 -0.38 -0.05 -0.02 -0.1 -0.03 -0.15 -0.05 -0.43 -0.11 -3.15 -0.08 -3.85 -0.08m7.63 0.08c-0.46 0.11 -0.84 0.32 -1.13 0.63 -0.45 0.48 -0.68 1.21 -0.68 2.2 0 0.98 0.23 1.7 0.68 2.18 0.45 0.48 1.1 0.71 1.95 0.71h0.79c0.85 0 1.5 -0.24 1.95 -0.71 0.45 -0.48 0.68 -1.2 0.68 -2.18 0 -0.98 -0.23 -1.71 -0.68 -2.2 -0.29 -0.31 -0.67 -0.52 -1.13 -0.63 0 0 -0.45 -0.08 -1.2 -0.08 -0.75 0 -1.24 0.08 -1.24 0.08m5.4 -0.08v3.95c0 1.24 0.63 1.85 1.88 1.85h1.22c0.63 0 1.1 -0.16 1.42 -0.46 0.31 -0.31 0.47 -0.77 0.47 -1.39v-3.95h-1v3.87c0 0.29 -0.08 0.52 -0.23 0.68 -0.15 0.16 -0.39 0.24 -0.72 0.24h-1.04c-0.34 0 -0.58 -0.08 -0.74 -0.24 -0.15 -0.16 -0.23 -0.38 -0.23 -0.68v-3.87z
+                  m6.34 0 0 1.01h3.02c0.28 0 0.48 0.08 0.61 0.23 0.13 0.15 0.2 0.33 0.2 0.55 0 0.1 -0.02 0.2 -0.05 0.3 -0.03 0.09 -0.08 0.18 -0.14 0.26 -0.06 0.07 -0.15 0.14 -0.25 0.18 -0.1 0.05 -0.23 0.07 -0.37 0.07h-2.09c-0.32 0 -0.55 0.07 -0.7 0.21 -0.14 0.14 -0.22 0.38 -0.22 0.71v2.3h1.02v-2.1c0 -0.1 0.05 -0.15 0.14 -0.15h1.81c0.34 0 0.63 -0.06 0.87 -0.16 0.24 -0.11 0.43 -0.25 0.58 -0.42 0.15 -0.17 0.26 -0.37 0.32 -0.59 0.07 -0.22 0.1 -0.44 0.1 -0.65 0 -0.23 -0.04 -0.45 -0.11 -0.66 -0.07 -0.21 -0.18 -0.4 -0.33 -0.56 -0.15 -0.16 -0.35 -0.29 -0.58 -0.38 -0.05 -0.02 -0.1 -0.03 -0.15 -0.05 -0.31 -0.08 -1.13 -0.08 -3.68 -0.08"/>
+                  </g>
+                  </svg>
+              </div>
+              <h3>🌐 Stage 2 : Support Réseau</h3>
+              <p><strong>📅 Durée :</strong> 2 mois</p>
+              <p><strong>🏢 Entreprise :</strong> ISI-group</p>
+              <p><strong>🚀 Missions :</strong></p>
+              <ul>
+                <li>📡 Surveillance et optimisation des infrastructures réseau</li>
+                <li>🛠️ Diagnostic et résolution des incidents techniques</li>
+                <li>🔌 Installation et configuration de nouveaux équipements</li>
+                <li>📊 Rédaction de procédures techniques</li>
+              </ul>
+              <p><strong>📝 Compétences acquises :</strong> Configuration de routeurs/switches, Sécurité réseau, Gestion des tickets</p>
+            </div>
+          </div>
+        </div>
+  </section>
+
+  <!-- ===================== SECTION COMPÉTENCES ===================== -->
+  <section id="skills" class="skills section">
+    <div class="container">
+      <img src="images/icon/Hunter_Association_logo.webp" class="section-icon" alt="COMPÉTENCES">
+      <h2 class="hxh-title">🔥 Mes Compétences 🔥</h2>
+      
+      <!-- Conteneur de la synthèse des compétences -->
+      <div class="synthese-container">
+        <iframe src="https://docs.google.com/spreadsheets/d/11kXnX0RF5ksA3PlViHjMRnaSPdoGwsF6/preview" class="synthese-preview"></iframe>
+        
+        <a href="https://docs.google.com/spreadsheets/d/11kXnX0RF5ksA3PlViHjMRnaSPdoGwsF6/view?usp=sharing" target="_blank" class="synthese-download">
+          📥 Télécharger la Synthèse des Compétences
+        </a>
+        <a href="https://drive.google.com/file/d/1_25qubcp_2K54v07MW9iFWRdB2RrlvPa/view?usp=drive_link" target="_blank" class="synthese-download">
+          🔍 Voir le référenciel des compétences
+        </a>
+      </div>
+    </div>    
+      <p class="hxh-subtitle">"Le talent n'est pas un don, il est une conquête."</p>
+       <div class="skills-grid">
+          <!-- Compétence 1 : Administration de services -->
+            <div class="skill-card-container">
+              <div class="skill-card administration-services">
+                <div class="skill-front">
+                  <h3>📡 Administration de services</h3>
+                  <p class="nen-type">🔴 Gestion des services réseau</p>
+                </div>
+                <div class="skill-back">
+                  <h3>📡 Administration de services</h3>
+                  <p>DHCP, HTTP (Apache)</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 75%;" data-percent="75"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 2 : Administration de systèmes -->
+            <div class="skill-card-container">
+              <div class="skill-card administration-systems">
+                <div class="skill-front">
+                  <h3>💻 Administration de systèmes</h3>
+                  <p class="nen-type">🟡 Gestion des systèmes</p>
+                </div>
+                <div class="skill-back">
+                  <h3>💻 Administration de systèmes</h3>
+                  <p>Windows AD, Linux</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 90%;" data-percent="90"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 3 : Sécurité -->
+            <div class="skill-card-container">
+              <div class="skill-card security">
+                <div class="skill-front">
+                  <h3>🔒 Sécurité</h3>
+                  <p class="nen-type">🔵 Protection des données</p>
+                </div>
+                <div class="skill-back">
+                  <h3>🔒 Sécurité</h3>
+                  <p>VLAN, TLS, SSH, WinSCP</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 80%;" data-percent="80"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 4 : Câblage & éléments d'interconnexion -->
+            <div class="skill-card-container">
+              <div class="skill-card interconnection">
+                <div class="skill-front">
+                  <h3>🔌 Câblage & éléments d'interconnexion</h3>
+                  <p class="nen-type">🟣 Installation & configuration</p>
+                </div>
+                <div class="skill-back">
+                  <h3>🔌 Câblage & éléments d'interconnexion</h3>
+                  <p>Besoins, caractéristiques, installation</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 100%;" data-percent="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 5 : Gestion de parc -->
+            <div class="skill-card-container">
+              <div class="skill-card management-inventory">
+                <div class="skill-front">
+                  <h3>📦 Gestion de parc</h3>
+                  <p class="nen-type">🔴 Inventaire & déploiement</p>
+                </div>
+                <div class="skill-back">
+                  <h3>📦 Gestion de parc</h3>
+                  <p>Inventaire (GLPI), Déploiement, Sauvegarde/Restauration (Cobian)</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 50%;" data-percent="50"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 6 : Gestion et résolution d'incidents -->
+            <div class="skill-card-container">
+              <div class="skill-card incident-management">
+                <div class="skill-front">
+                  <h3>⚠️ Gestion d'incidents</h3>
+                  <p class="nen-type">🟢 Résolution</p>
+                </div>
+                <div class="skill-back">
+                  <h3>⚠️ Gestion d'incidents</h3>
+                  <p>Démarche ITIL, gestion de tickets (GLPI, iTop), prise en main distant (VNC, RDP)</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 50%;" data-percent="50"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 7 : Modèle relationnel -->
+            <div class="skill-card-container">
+              <div class="skill-card relational-model">
+                <div class="skill-front">
+                  <h3>🗂️ Modèle relationnel</h3>
+                  <p class="nen-type">🔴 Bases de données</p>
+                </div>
+                <div class="skill-back">
+                  <h3>🗂️ Modèle relationnel</h3>
+                  <p>MySQL, Access</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 30%;" data-percent="30"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 8 : Manipulation des données & gestion des droits d’accès -->
+            <div class="skill-card-container">
+              <div class="skill-card data-management">
+                <div class="skill-front">
+                  <h3>📊 Manipulation des données</h3>
+                  <p class="nen-type">🟣 Gestion des accès</p>
+                </div>
+                <div class="skill-back">
+                  <h3>📊 Manipulation des données</h3>
+                  <p>Définition des données & gestion des droits d’accès (SQL)</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 15%;" data-percent="15"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 9 : RGPD et cybersécurité -->
+            <div class="skill-card-container">
+              <div class="skill-card gdpr-cybersecurity">
+                <div class="skill-front">
+                  <h3>⚖️ RGPD & Cybersécurité</h3>
+                  <p class="nen-type">🟢 Conformité et sécurité</p>
+                </div>
+                <div class="skill-back">
+                  <h3>⚖️ RGPD & Cybersécurité</h3>
+                  <p>Bases du RGPD et de la cybersécurité</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 70%;" data-percent="70"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 10 : Développement Web -->
+            <div class="skill-card-container">
+              <div class="skill-card web-development">
+                <div class="skill-front">
+                  <h3>🌐 Développement Web</h3>
+                  <p class="nen-type">🔴 Programmation Front-End & Back-End</p>
+                </div>
+                <div class="skill-back">
+                  <h3>🌐 Développement Web</h3>
+                  <p>PHP/MySQL, HTML, CSS, JavaScript</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 60%;" data-percent="60"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 11 : Développement événementiel C# -->
+            <div class="skill-card-container">
+              <div class="skill-card event-driven-development">
+                <div class="skill-front">
+                  <h3>💻 Développement événementiel C#</h3>
+                  <p class="nen-type">🟣 Programmation événementielle</p>
+                </div>
+                <div class="skill-back">
+                  <h3>💻 Développement événementiel C#</h3>
+                  <p>Visual Studio</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 15%;" data-percent="15"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Compétence 12 : Cisco Packet Tracer -->
+            <div class="skill-card-container">
+              <div class="skill-card cisco-packet-tracer">
+                <div class="skill-front">
+                  <h3>🔧 Cisco Packet Tracer</h3>
+                  <p class="nen-type">🟡 Simulation réseau</p>
+                </div>
+                <div class="skill-back">
+                  <h3>🔧 Cisco Packet Tracer</h3>
+                  <p>Simulation de réseaux et configuration Cisco</p>
+                  <div class="skill-bar">
+                    <div class="skill-fill" style="width: 100%;" data-percent="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  </section>    
+
+<!-- ===================== SECTION PROJETS ===================== -->
+<section id="projects" class="projects section">
+  <div class="container">
+      <img src="images/valorant.png" class="section-icon" alt="PROJETS">
+      <h2>📂 MES PROJETS</h2>
+      <p>"L'information, c'est le pouvoir." - Cypher</p>
+
+      <!-- ===================== AP ===================== -->
+      <div class="project-category">
+          <h2>📌 AP</h2>
+
+          <div class="project">
+              <h3>AP1.3 - CV/LM/Portfolio</h3>
+              <p>Création et gestion de CV, Lettre de motivation et Portfolio.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=1xg8Mlfy0tLFz3gsTxg9TYyUPHMrDARCD#list"></iframe>
+                      </td>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/1xg8Mlfy0tLFz3gsTxg9TYyUPHMrDARCD" target="_blank" class="open-link-btn">
+                  🔗 AP1.3 - CV/LM/Portfolio
+              </a>
+              <a href="https://drive.google.com/file/d/1PXikvt7Dsq1wpJ8cFGEiTCnt3xKi7tKg/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+
+          <div class="project">
+              <h3>AP - GPOPU</h3>
+              <p>Déploiement Windows Server avec AD, GPO et un script pour mettre en place les utilisateurs et groupe AD.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=1s8ygPzjyq_sCE4dxTCpBnuHL58R1sloc#list"></iframe>
+                      </td>
+                      <iframe src="https://trello.com/b/E1jVDBko.html" width="100%" height="600px"></iframe>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/1s8ygPzjyq_sCE4dxTCpBnuHL58R1sloc" target="_blank" class="open-link-btn">
+                  🔗 AP - GPOPU
+              </a>
+              <a href="https://drive.google.com/file/d/1vnbcuVWe6Vms8OofsuXI-UD5HyY8MJb0/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+      </div>
+
+      <!-- ===================== Stage 1ère Année ===================== -->
+      <div class="project-category">
+          <h2>📌 Stage 1ère Année</h2>
+
+          <div class="project">
+              <h3>LABO</h3>
+              <p>Firewall (Pfsense, OpenVPN) - Windows Server 2012 (DHCP, DNS, AD, GPO) - Serveur Web (LAMP, GLPI) - FreePBX - Veille technologique.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=1WpsJfEQE4RzGC-RXDrkItIQP5EivUR_j#list"></iframe>
+                      </td>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/1WpsJfEQE4RzGC-RXDrkItIQP5EivUR_j" target="_blank" class="open-link-btn">
+                  🔗 LABO
+              </a>
+              <a href="https://drive.google.com/file/d/1fjFVSqJ6ksQoMAvJ2WPKIBiTjkeUoA3z/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+      </div>
+
+      <!-- ===================== Stage 2ème Année ===================== -->
+      <div class="project-category">
+          <h2>📌 Stage 2ème Année</h2>
+
+          <div class="project">
+              <h3>Ticket client</h3>
+              <p>Assistance utilisateur.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=1xPpj6d97tdnxF3CVUNn-ev5DkEH3WQvw#list"></iframe>
+                      </td>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/1xPpj6d97tdnxF3CVUNn-ev5DkEH3WQvw" target="_blank" class="open-link-btn">
+                  🔗 Ticket client
+              </a>
+              <a href="https://drive.google.com/file/d/1XyIOPDQb_pDtduQ1wYbRZpiwR-DfSkAt/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+
+          <div class="project">
+              <h3>Site web</h3>
+              <p>Analyse des services proposés par l’entreprise sur le site web et sa visibilité.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=1VZiAwHFjAo9zaxx5DQ0qDdGR8OaR530e#list"></iframe>
+                      </td>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/1VZiAwHFjAo9zaxx5DQ0qDdGR8OaR530e" target="_blank" class="open-link-btn">
+                  🔗 Site web
+              </a>
+              <a href="https://drive.google.com/file/d/1d_1pQTM1-PFq8jC1i9xREgRWr9bicwzT/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+
+          <div class="project">
+              <h3>Connexion à distance</h3>
+              <p>Connexion SSH avec interface visuelle via Xming et X1. Connexion et prise en main à distance avec Rust Desk.</p>
+              <table class="iframe-table">
+                  <tr>
+                      <td>
+                          <iframe src="https://drive.google.com/embeddedfolderview?id=13NmOBJSmitBXPLmq7QR9KbHyI7tqGN7m#list"></iframe>
+                      </td>
+                  </tr>
+              </table>
+              <a href="https://drive.google.com/drive/folders/13NmOBJSmitBXPLmq7QR9KbHyI7tqGN7m" target="_blank" class="open-link-btn">
+                  🔗 Connexion à distance
+              </a>
+              <a href="https://drive.google.com/file/d/18W0AfOzziSxd7men3oj9_jmBcS2dwKpK/view" target="_blank" class="open-link-btn">
+                  📄 Fiche RP
+              </a>
+          </div>
+          <div class="project">
+            <h3>Proxmox</h3>
+            <p>Installation et configuration d’un Proxmox post-production.</p>
+            <table class="iframe-table">
+                <tr>
+                    <td>
+                        <iframe src="https://drive.google.com/embeddedfolderview?id=1Mcykz3XKKN9VnNIL8CHPjUvH4CFxf_kO#list"></iframe>
+                    </td>
+                </tr>
+            </table>
+            <a href="https://drive.google.com/drive/folders/1Mcykz3XKKN9VnNIL8CHPjUvH4CFxf_kO" target="_blank" class="open-link-btn">
+                🔗 Proxmox
+            </a>
+            <a href="https://drive.google.com/file/d/1P1NPwkXYHm9tMxJFJglQRLbPkZB-yJEP/view" target="_blank" class="open-link-btn">
+                📄 Fiche RP
+            </a>
+        </div>
+        
+      </div>
+  </div>
+</section>
+
+  <!-- ===================== SECTION VEILLE ===================== -->
+<section id="veille" class="veille section" aria-label="Veille Technologique">
+  <div class="container">
+    <header>
+      <img src="images/overlord.png" class="section-icon" alt="Icône de veille">
+      <h2>📚 Veille Technologique : Composants Informatiques en Entreprise</h2>
+    </header>
+
+    <article class="veille-introduction">
+      <p><strong>Nom et Prénom :</strong> EL MENSI Mehdi</p>
+      <p><strong>Parcours :</strong> BTS SIO SISR</p>
+      <p><strong>Contexte de réalisation :</strong> R2 Micro, Services & Conseils en Informatique, Mérignac</p>
+      <p><strong>Période de réalisation :</strong> 03/06/2024 - 28/06/2024</p>
+      <p><strong>Modalité :</strong> Individuelle</p>
+    </article>
+
+    <article>
+      <h3>🎯 Objectifs de la veille</h3>
+      <p>
+        L'objectif principal de cette veille est d'identifier et d'analyser les composants matériels et logiciels critiques pour les infrastructures informatiques en entreprise. 
+        Cette veille permet de choisir les équipements optimaux en fonction des besoins en entreprise, d'améliorer la performance des systèmes et de conseiller efficacement les clients 
+        sur les solutions adaptées à leurs locaux.
+      </p>
+    </article>
+
+    <article>
+      <h3>📅 Sources d'information utilisées</h3>
+      <ul>
+        <li><strong>Moteur de recherche :</strong> Google, Bing</li>
+        <li><strong>Agrégateurs de flux RSS :</strong> Feedly, Inoreader, Netvibes</li>
+        <li><strong>Alertes Google :</strong> Sur les tendances du matériel informatique</li>
+        <li><strong>Réseaux sociaux professionnels :</strong> LinkedIn, Twitter (X), Reddit</li>
+        <li><strong>Sites spécialisés :</strong> Tom’s Hardware, Le Monde Informatique, ZDNet, 01net, Clubic</li>
+        <li><strong>Magazines spécialisés :</strong> L'Informaticien, IT for Business, TechPowerUp</li>
+        <li><strong>Conférences & Webinaires :</strong> Webinars de fabricants (Intel, AMD, Nvidia, Dell, HP)</li>
+      </ul>
+    </article>
+
+    <article>
+      <h3>📌 Thèmes de veille</h3>
+
+      <h4>🖥️ Composants matériels</h4>
+      <ul>
+        <li><strong>Processeurs :</strong> AMD Ryzen 8000, Intel Core 14e génération, AMD EPYC (serveurs)</li>
+        <li><strong>Cartes graphiques :</strong> Nvidia RTX série 5000, AMD Radeon Pro, Intel Arc</li>
+        <li><strong>Mémoires :</strong> RAM DDR5, SSD NVMe PCIe 4.0 & 5.0, HDD haute capacité</li>
+        <li><strong>Cartes mères :</strong> Nouveaux chipsets (Intel Z790, AMD X670), compatibilité PCIe</li>
+        <li><strong>Refroidissement et alimentation :</strong> Watercooling, PSU haute efficacité 80+ Titanium</li>
+      </ul>
+
+      <h4>💾 Composants logiciels</h4>
+      <ul>
+        <li><strong>Systèmes d'exploitation :</strong> Windows 11 (mises à jour sécurité), Linux (distros serveurs et entreprises)</li>
+        <li><strong>Logiciels professionnels :</strong> Suite Microsoft 365, logiciels de virtualisation (VMware, Proxmox)</li>
+        <li><strong>Logiciels de sécurité :</strong> Solutions EDR/XDR, Zero Trust Security, pare-feu nouvelle génération</li>
+      </ul>
+
+      <h4>🌐 Composants réseau</h4>
+      <ul>
+        <li><strong>Équipements :</strong> Wi-Fi 6E, routeurs 5G, commutateurs réseau 10GbE</li>
+        <li><strong>Technologies :</strong> Fibre optique ultra-haut débit, SD-WAN, réseaux définis par logiciel (SDN)</li>
+        <li><strong>Stockage réseau :</strong> NAS & SAN évolutifs, hybridation cloud (AWS, Azure, Google Cloud)</li>
+      </ul>
+
+      <h4>🌱 Écologie et durabilité</h4>
+      <ul>
+        <li><strong>Green IT :</strong> Composants basse consommation, recyclage des équipements informatiques</li>
+        <li><strong>Cloud Green Computing :</strong> Data centers éco-responsables, IA pour optimisation énergétique</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+
+  <!-- ===================== SECTION CONTACT ===================== -->
+  <footer id="contact" class="contact">
+          <div class="container">
+              <h2>📞 ME CONTACTER</h2>
+              <p>Email : <a href="mailto:mehdi.elmensi.pro@gmail.com">mehdi.elmensi.pro@gmail.com</a></p>
+              <p>Téléphone : <a href="tel:+33123456789">07 69 18 21 07</a></p>
+              <p>LinkedIn : <a href="https://www.linkedin.com/in/mehdi-el-mensi/" target="_blank">Mehdi EL MENSI </a></p>
+          </div>
+  </footer>
+
+  <!-- ===================== SCRIPT JS ===================== -->
+  <script src="script.js"></script>
+  <!-- Bibliothèques pour générer le PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>
