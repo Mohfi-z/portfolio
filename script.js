@@ -1,38 +1,11 @@
 // =========================================
 //
-// 🔥 SCRIPT PRINCIPAL D'ANIMATION ET INTERACTIONS
+// SCRIPT PRINCIPAL D'ANIMATION ET INTERACTIONS
 //
 // =========================================
 
-
 // =========================================
-// 🚀 Chargement 
-// =========================================
-document.addEventListener("DOMContentLoaded", function () {
-  const loader = document.querySelector(".loader-wrapper");
-
-  // Ajoute la classe pour l'effet d'apparition
-  setTimeout(() => {
-      loader.classList.add("show");
-  }, 100);
-
-  function hideLoader() {
-      loader.classList.add("hidden");
-      document.body.style.overflow = "auto"; 
-
-      setTimeout(() => {
-          loader.remove();
-      }, 1000); // Correspond au temps de l'animation CSS
-  }
-
-  // Simulation d'un chargement de 1.5 secondes
-  setTimeout(() => {
-      hideLoader();
-  }, 1500);
-});
-
-// =========================================
-// 🔤 Lettres runes
+// Lettres runes
 // =========================================
 document.addEventListener("DOMContentLoaded", function () {
   const letters = document.querySelectorAll(".hero-container h1 span");
@@ -355,640 +328,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // =========================================
-// * Mini jeu
-// =========================================
-document.addEventListener("DOMContentLoaded", function () {
-  /* ========= VARIABLES GLOBALES ========= */
-  const profileImage = document.getElementById("profile-image");
-  const virusGame = document.getElementById("virus-game");
-  const gameArea = document.getElementById("game-area");
-  const restartGame = document.getElementById("restart-game");
-  const quitGame = document.getElementById("quit-game");
-
-  let gameMessage, timerDisplay;
-  let gameActive = false;
-  let timeLeft;
-  let viruses = [];
-  let countdown;
-  let gameInterval;
-  let mousePos = { x: 0, y: 0 };
-
-  // Mode infini
-  let currentMode = "";
-  let infiniteSpawnInterval, infiniteMovementInterval, infiniteDifficultyInterval;
-  let infiniteCoinSpawnInterval, infiniteCoinCheckInterval;
-  let coins = [];
-  let infiniteTime = 0;
-  let infiniteDifficulty = 5;
-  let difficultyMultiplier = 2;
-
-  // Pour éviter des fins multiples
-  let gameEnded = false;
-
-  const difficulties = {
-    facile: { count: 12, speed: 9, time: 6 },
-    moyen: { count: 14, speed: 11, time: 5 },
-    difficile: { count: 16, speed: 20, time: 4 },
-    personnaliser: { count: 16, speed: 13, time: 4 }
-  };
-
-  virusGame.style.display = "none";
-
-  /* ========= GESTION DE LA SOURIS ========= */
-  document.addEventListener("mousemove", (e) => {
-    mousePos.x = e.clientX;
-    mousePos.y = e.clientY;
-  });
-
-  /* ========= FONCTIONS DE VÉRIFICATION ========= */
-  function verifyPreVirusCollision(virus) {
-    if (!virus) {
-      console.warn("Pré-vérification virus : virus non défini");
-      return false;
-    }
-    if (!document.body.contains(virus)) {
-      console.warn("Pré-vérification virus : virus absent du DOM");
-      return false;
-    }
-    if (!mousePos || typeof mousePos.x !== "number" || typeof mousePos.y !== "number") {
-      console.warn("Pré-vérification virus : position de la souris invalide");
-      return false;
-    }
-    return true;
-  }
-
-  function verifyPostVirusCollision(virus) {
-    if (!document.body.contains(virus)) {
-      console.warn("Post-vérification virus : virus supprimé durant la vérification");
-      return false;
-    }
-    return true;
-  }
-
-  function verifyPreCoinCheck(coin) {
-    if (!coin) {
-      console.warn("Pré-vérification pièce : pièce non définie");
-      return false;
-    }
-    if (!document.body.contains(coin)) {
-      console.warn("Pré-vérification pièce : pièce absente du DOM");
-      return false;
-    }
-    if (!coin.spawnTime || typeof coin.spawnTime !== "number") {
-      console.warn("Pré-vérification pièce : spawnTime invalide");
-      return false;
-    }
-    return true;
-  }
-
-  function verifyPostCoinCheck(coin) {
-    if (!document.body.contains(coin)) {
-      console.warn("Post-vérification pièce : pièce supprimée durant la vérification");
-      return false;
-    }
-    return true;
-  }
-
-  /* ========= FONCTIONS DE DÉTECTION ========= */
-  function checkVirusCollision(virus) {
-    if (!verifyPreVirusCollision(virus)) return false;
-    const rect = virus.getBoundingClientRect();
-    const radius = rect.width / 2;
-    const currentCenter = { x: rect.left + radius, y: rect.top + radius };
-
-    // Initialiser la position précédente
-    if (!virus.lastCenter) virus.lastCenter = currentCenter;
-
-    // Calcul du segment parcouru par le virus
-    const start = virus.lastCenter;
-    const end = currentCenter;
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const segLengthSq = dx * dx + dy * dy;
-    let t = segLengthSq > 0 ? ((mousePos.x - start.x) * dx + (mousePos.y - start.y) * dy) / segLengthSq : 0;
-    t = Math.max(0, Math.min(1, t));
-    const closest = { x: start.x + t * dx, y: start.y + t * dy };
-
-    const diffX = mousePos.x - closest.x;
-    const diffY = mousePos.y - closest.y;
-    const distanceSq = diffX * diffX + diffY * diffY;
-
-    // Ajout d'une marge pour compenser les mouvements rapides
-    const toleranceFactor = 1.3;
-    const collision = distanceSq < Math.pow(radius * toleranceFactor, 2);
-
-    virus.lastCenter = currentCenter;
-    if (collision && !verifyPostVirusCollision(virus)) return false;
-    return collision;
-  }
-
-  function checkCoinCollection(coin) {
-    if (!verifyPreCoinCheck(coin)) return false;
-    const rect = coin.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const dx = mousePos.x - centerX;
-    const dy = mousePos.y - centerY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    // Zone de collecte élargie pour éviter les pertes involontaires
-    const collectionThreshold = (rect.width / 2) * 1.5;
-    const collected = distance < collectionThreshold;
-    if (collected && !verifyPostCoinCheck(coin)) return false;
-    return collected;
-  }
-
-  /* ========= MENU DE DIFFICULTÉ ========= */
-  profileImage.addEventListener("click", showDifficultyMenu);
-
-  function showDifficultyMenu() {
-    virusGame.style.display = "block";
-    clearCoins();
-
-    gameArea.innerHTML = `
-      <div id="difficulty-menu" style="text-align:center; margin-top:50px;">
-        <h2>Choisissez la difficulté</h2>
-        <label for="difficulty-select">Difficulté : </label>
-        <select id="difficulty-select">
-          <option value="facile">Facile</option>
-          <option value="moyen">Moyen</option>
-          <option value="difficile">Difficile</option>
-          <option value="personnaliser">Personnalisé</option>
-          <option value="infini">Infini</option>
-        </select>
-        <div id="custom-options" style="display:none; margin-top:20px;">
-          <label>Nombre de virus : <input type="number" id="custom-count" value="12" min="1"></label><br>
-          <label>Vitesse : <input type="number" id="custom-speed" value="9" min="1" step="0.5"></label><br>
-          <label>Temps (sec) : <input type="number" id="custom-time" value="4" min="1"></label>
-        </div>
-        <br>
-        <button id="start-game-button" style="margin-top:20px; padding:10px 20px;">Commencer</button>
-        <button id="quit-menu-button" style="margin-top:20px; padding:10px 20px;">Quitter</button>
-      </div>
-    `;
-
-    const difficultySelect = document.getElementById("difficulty-select");
-    const customOptions = document.getElementById("custom-options");
-
-    difficultySelect.addEventListener("change", function () {
-      customOptions.style.display = this.value === "personnaliser" ? "block" : "none";
-    });
-
-    document.getElementById("start-game-button").addEventListener("click", () => {
-      let selected = difficultySelect.value;
-      if (selected === "personnaliser") {
-        let customCount = parseInt(document.getElementById("custom-count").value) || difficulties.personnaliser.count;
-        let customSpeed = parseFloat(document.getElementById("custom-speed").value) || difficulties.personnaliser.speed;
-        let customTime = parseInt(document.getElementById("custom-time").value) || difficulties.personnaliser.time;
-        difficulties.personnaliser = { count: customCount, speed: customSpeed, time: customTime };
-        startGameWithDifficulty("personnaliser");
-      } else {
-        startGameWithDifficulty(selected);
-      }
-    });
-
-    document.getElementById("quit-menu-button").addEventListener("click", () => {
-      virusGame.style.display = "none";
-    });
-  }
-
-  /* ========= DÉMARRAGE DU JEU ========= */
-  function startGameWithDifficulty(mode) {
-    // Réinitialiser le flag de fin de partie
-    gameEnded = false;
-    currentMode = mode;
-    if (mode === "infini") {
-      startInfiniteMode();
-      return;
-    }
-
-    const params = difficulties[mode];
-    gameActive = true;
-    timeLeft = params.time;
-
-    gameArea.innerHTML = `
-      <p id="game-timer">Temps : <span id="timer">${params.time}</span> sec</p>
-      <p id="game-message"></p>
-    `;
-    timerDisplay = document.getElementById("timer");
-    gameMessage = document.getElementById("game-message");
-    gameMessage.style = "";
-
-    restartGame.style.display = "none";
-    quitGame.style.display = "inline-block";
-
-    spawnViruses(params.count, params.speed);
-    startTimer();
-  }
-
-  /* ========= MODE CLASSIQUE ========= */
-  function spawnViruses(count, speed) {
-    viruses.forEach(v => v.remove());
-    viruses = [];
-    for (let i = 0; i < count; i++) {
-      let virus = document.createElement("div");
-      virus.classList.add("virus");
-      virus.style.position = "absolute";
-      virus.style.top = `${Math.random() * 80}vh`;
-      virus.style.left = `${Math.random() * 90}vw`;
-      virus.style.width = "30px";
-      virus.style.height = "30px";
-      virus.velocity = { x: 0, y: 0 };
-      gameArea.appendChild(virus);
-      viruses.push(virus);
-    }
-    startVirusMovement(difficulties[currentMode].speed);
-  }
-
-  function startVirusMovement(maxSpeed) {
-    const acceleration = 0.5;
-    const separationDistance = 30;
-    const separationStrength = 0.3;
-    gameInterval = setInterval(() => {
-      viruses.forEach((virus, index) => {
-        let rect = virus.getBoundingClientRect();
-        let virusX = rect.left + rect.width / 2;
-        let virusY = rect.top + rect.height / 2;
-        let angle = Math.atan2(mousePos.y - virusY, mousePos.x - virusX);
-        virus.velocity.x += Math.cos(angle) * acceleration;
-        virus.velocity.y += Math.sin(angle) * acceleration;
-
-        let repulsion = { x: 0, y: 0 };
-        viruses.forEach((otherVirus, otherIndex) => {
-          if (otherIndex === index) return;
-          let otherRect = otherVirus.getBoundingClientRect();
-          let otherX = otherRect.left + otherRect.width / 2;
-          let otherY = otherRect.top + otherRect.height / 2;
-          let diffX = virusX - otherX;
-          let diffY = virusY - otherY;
-          let distance = Math.sqrt(diffX * diffX + diffY * diffY);
-          if (distance < separationDistance && distance > 0) {
-            repulsion.x += diffX / distance;
-            repulsion.y += diffY / distance;
-          }
-        });
-        virus.velocity.x += repulsion.x * separationStrength;
-        virus.velocity.y += repulsion.y * separationStrength;
-
-        let currentSpeed = Math.sqrt(virus.velocity.x ** 2 + virus.velocity.y ** 2);
-        if (currentSpeed > maxSpeed) {
-          virus.velocity.x = (virus.velocity.x / currentSpeed) * maxSpeed;
-          virus.velocity.y = (virus.velocity.y / currentSpeed) * maxSpeed;
-        }
-
-        let newLeft = virus.offsetLeft + virus.velocity.x;
-        let newTop = virus.offsetTop + virus.velocity.y;
-        virus.style.left = `${newLeft}px`;
-        virus.style.top = `${newTop}px`;
-
-        if (checkVirusCollision(virus)) {
-          if (!virus.collisionStart) {
-            virus.collisionStart = Date.now();
-          } else if (Date.now() - virus.collisionStart > 100) {
-            if (checkVirusCollision(virus)) {
-              endGame(false, virus);
-            }
-          }
-        } else {
-          virus.collisionStart = null;
-        }
-      });
-    }, 50);
-  }
-
-  function startTimer() {
-    countdown = setInterval(() => {
-      timeLeft--;
-      timerDisplay.textContent = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        endGame(true);
-      }
-    }, 1000);
-  }
-
-  /* ========= MODE INFINI ========= */
-  function startInfiniteMode() {
-    gameEnded = false;
-    gameActive = true;
-    infiniteTime = 0;
-    infiniteDifficulty = 1; // Départ plus simple
-    difficultyMultiplier = 2;
-    clearViruses();
-    clearCoins();
-
-    gameArea.innerHTML = `
-      <p id="game-timer">Temps : <span id="timer">0</span> sec</p>
-      <p id="game-message"></p>
-    `;
-    timerDisplay = document.getElementById("timer");
-    gameMessage = document.getElementById("game-message");
-    gameMessage.style = "";
-
-    restartGame.style.display = "none";
-    quitGame.style.display = "inline-block";
-
-    infiniteSpawnInterval = setInterval(spawnInfiniteVirus, 100);
-    infiniteMovementInterval = setInterval(updateInfiniteVirusMovement, 50);
-    // Augmentation progressive avec intensification accélérée
-    infiniteDifficultyInterval = setInterval(() => {
-      infiniteTime++;
-      timerDisplay.textContent = infiniteTime;
-      infiniteDifficulty += 0.05 * (1 + infiniteTime / 10);
-    }, 1000);
-    infiniteCoinSpawnInterval = setInterval(spawnInfiniteCoin, 3000);
-    infiniteCoinCheckInterval = setInterval(checkInfiniteCoinCollision, 50);
-  }
-
-  function updateInfiniteVirusMovement() {
-    const maxInfiniteSpeed = 50; // Vitesse max autorisée
-    viruses.forEach((virus, index) => {
-      let dx = virus.baseVelocity.x * infiniteDifficulty * difficultyMultiplier;
-      let dy = virus.baseVelocity.y * infiniteDifficulty * difficultyMultiplier;
-      let effectiveSpeed = dx * dx + dy * dy;
-      if (effectiveSpeed > maxInfiniteSpeed * maxInfiniteSpeed) {
-        const factor = maxInfiniteSpeed / Math.sqrt(effectiveSpeed);
-        dx *= factor;
-        dy *= factor;
-      }
-      let newLeft = virus.offsetLeft + dx;
-      let newTop = virus.offsetTop + dy;
-      virus.style.left = `${newLeft}px`;
-      virus.style.top = `${newTop}px`;
-
-      if (checkVirusCollision(virus)) {
-        if (!virus.collisionStart) {
-          virus.collisionStart = Date.now();
-        } else if (Date.now() - virus.collisionStart > 100) {
-          if (checkVirusCollision(virus)) {
-            endGame(false, virus);
-          }
-        }
-      } else {
-        virus.collisionStart = null;
-      }
-
-      if (
-        virus.offsetLeft < -100 ||
-        virus.offsetLeft > window.innerWidth + 100 ||
-        virus.offsetTop < -100 ||
-        virus.offsetTop > window.innerHeight + 100
-      ) {
-        virus.remove();
-        viruses.splice(index, 1);
-      }
-    });
-  }
-
-  function spawnInfiniteVirus() {
-    let edge = Math.floor(Math.random() * 4);
-    let x, y, angle;
-    const baseSpeed = 3;
-    const variationAngle = Math.PI / 6;
-    switch (edge) {
-      case 0:
-        x = -50;
-        y = Math.random() * window.innerHeight;
-        angle = 0 + (Math.random() * variationAngle - variationAngle / 2);
-        break;
-      case 1:
-        x = Math.random() * window.innerWidth;
-        y = -50;
-        angle = Math.PI / 2 + (Math.random() * variationAngle - variationAngle / 2);
-        break;
-      case 2:
-        x = window.innerWidth + 50;
-        y = Math.random() * window.innerHeight;
-        angle = Math.PI + (Math.random() * variationAngle - variationAngle / 2);
-        break;
-      case 3:
-        x = Math.random() * window.innerWidth;
-        y = window.innerHeight + 50;
-        angle = (3 * Math.PI) / 2 + (Math.random() * variationAngle - variationAngle / 2);
-        break;
-    }
-    let virus = document.createElement("div");
-    virus.classList.add("virus");
-    virus.style.position = "absolute";
-    virus.style.left = `${x}px`;
-    virus.style.top = `${y}px`;
-    virus.style.width = "30px";
-    virus.style.height = "30px";
-    virus.baseVelocity = {
-      x: Math.cos(angle) * baseSpeed,
-      y: Math.sin(angle) * baseSpeed
-    };
-    gameArea.appendChild(virus);
-    viruses.push(virus);
-  }
-
-  function spawnInfiniteCoin() {
-    let coin = document.createElement("div");
-    coin.classList.add("coin");
-    coin.style.position = "absolute";
-    coin.style.left = `${Math.random() * (window.innerWidth - 20)}px`;
-    coin.style.top = `${Math.random() * (window.innerHeight - 20)}px`;
-    coin.style.width = "20px";
-    coin.style.height = "20px";
-    coin.style.borderRadius = "50%";
-    coin.style.zIndex = "1000";
-    coin.spawnTime = Date.now();
-
-    let coinTypes = ["normal", "slow", "clear"];
-    let chosenType = coinTypes[Math.floor(Math.random() * coinTypes.length)];
-    coin.dataset.type = chosenType;
-
-    switch (chosenType) {
-      case "normal":
-        coin.style.background = "gold";
-        break;
-      case "slow":
-        coin.style.background = "blue";
-        break;
-      case "clear":
-        coin.style.background = "purple";
-        break;
-    }
-
-    gameArea.appendChild(coin);
-    coins.push(coin);
-  }
-
-  function checkInfiniteCoinCollision() {
-    const now = Date.now();
-    coins.forEach((coin, index) => {
-      if (!verifyPreCoinCheck(coin)) return;
-      
-      if (coin.dataset.type === "normal" && now - coin.spawnTime >= 10000) {
-        if (checkCoinCollection(coin)) {
-          handleCoinCollection(coin);
-          coin.remove();
-          coins.splice(index, 1);
-          return;
-        } else {
-          console.warn("Pièce normale expirée et non collectée malgré la zone élargie");
-          endGame(false);
-          return;
-        }
-      }
-
-      if (checkCoinCollection(coin)) {
-        handleCoinCollection(coin);
-        coin.remove();
-        coins.splice(index, 1);
-      }
-    });
-  }
-
-  function handleCoinCollection(coin) {
-    let type = coin.dataset.type;
-    switch (type) {
-      case "slow":
-        difficultyMultiplier = 0.5;
-        setTimeout(() => { difficultyMultiplier = 1; }, 5000);
-        break;
-      case "clear":
-        let removeCount = Math.floor(viruses.length * 0.3);
-        for (let i = 0; i < removeCount; i++) {
-          let virus = viruses.shift();
-          if (virus) virus.remove();
-        }
-        break;
-      case "normal":
-      default:
-        break;
-    }
-  }
-
-  /* ========= FONCTIONS DE NETTOYAGE ========= */
-  function clearCoins() {
-    coins.forEach(c => {
-      if (c.timeoutID) clearTimeout(c.timeoutID);
-      c.remove();
-    });
-    coins = [];
-  }
-
-  function clearViruses() {
-    viruses.forEach(v => v.remove());
-    viruses = [];
-  }
-
-  function stopAllIntervals() {
-    const intervals = [
-      gameInterval,
-      countdown,
-      infiniteSpawnInterval,
-      infiniteMovementInterval,
-      infiniteDifficultyInterval,
-      infiniteCoinSpawnInterval,
-      infiniteCoinCheckInterval
-    ];
-    intervals.forEach(interval => {
-      if (interval) clearInterval(interval);
-    });
-  }
-
-  /* ========= FIN DE PARTIE ========= */
-  function endGame(win, killerVirus) {
-    if (gameEnded) return;
-    gameEnded = true;
-    gameActive = false;
-    stopAllIntervals();
-    clearCoins();
-
-    if (!win && killerVirus) {
-      killerVirus.style.zIndex = "10001";
-      killerVirus.style.boxShadow = "0 0 30px 10px red";
-      viruses = viruses.filter(v => {
-        if (v !== killerVirus) {
-          v.remove();
-          return false;
-        }
-        return true;
-      });
-    } else {
-      clearViruses();
-    }
-
-    gameMessage.textContent = win ? "🎉 Bravo, tu as survécu !" : "💀 Game Over !";
-    Object.assign(gameMessage.style, {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      fontSize: "3rem",
-      fontWeight: "bold",
-      padding: "20px 40px",
-      background: "rgba(0, 0, 0, 0.8)",
-      border: win ? "5px solid lime" : "5px solid red",
-      borderRadius: "10px",
-      zIndex: "10000",
-      boxShadow: win ? "0 0 20px lime" : "0 0 20px red",
-      textAlign: "center"
-    });
-    restartGame.style.display = "block";
-    quitGame.style.display = "none";
-    showEndParticles(win);
-  }
-
-  function showEndParticles(win) {
-    const particleCount = 10;
-    if (!document.getElementById("end-particle-style")) {
-      let style = document.createElement("style");
-      style.id = "end-particle-style";
-      style.innerHTML = `
-        @keyframes endParticleAnimation {
-          0% { transform: translate(0, 0); opacity: 1; }
-          100% { transform: translate(calc(var(--x, 0) * 100px), calc(var(--y, 0) * 100px)); opacity: 0; }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-    let particleColor = win ? "#00ff00" : "#ff0000";
-    for (let i = 0; i < particleCount; i++) {
-      let particle = document.createElement("div");
-      particle.classList.add("end-particle");
-      particle.style.background = particleColor;
-      let angle = Math.random() * 2 * Math.PI;
-      let distanceFactor = Math.random() * 1 + 0.5;
-      let offsetX = Math.cos(angle) * distanceFactor;
-      let offsetY = Math.sin(angle) * distanceFactor;
-      particle.style.setProperty("--x", offsetX);
-      particle.style.setProperty("--y", offsetY);
-      Object.assign(particle.style, {
-        position: "fixed",
-        left: "50%",
-        top: "50%",
-        width: "8px",
-        height: "8px",
-        borderRadius: "50%",
-        opacity: "1",
-        zIndex: "10000",
-        pointerEvents: "none",
-        animation: "endParticleAnimation 1s forwards"
-      });
-      document.body.appendChild(particle);
-      setTimeout(() => { particle.remove(); }, 1000);
-    }
-  }
-
-  /* ========= BOUTONS REJOUER & QUITTER ========= */
-  restartGame.addEventListener("click", () => {
-    // Lorsqu'on clique sur "Rejouer", on affiche le menu de difficulté pour démarrer une nouvelle partie
-    showDifficultyMenu();
-  });
-
-  quitGame.addEventListener("click", () => {
-    virusGame.style.display = "none";
-    gameActive = false;
-    stopAllIntervals();
-    if (currentMode === "infini") {
-      clearCoins();
-    }
-  });
-});
-
-// =========================================
 // * Bouton Projet
 // =========================================
 document.addEventListener("DOMContentLoaded", function () {
@@ -1079,727 +418,152 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // =========================================
-// * Bouton Modals
-// =========================================
-document.addEventListener("DOMContentLoaded", function () {
-  const profileName = document.getElementById("profile-name");
-
-  profileName.addEventListener("click", function () {
-    // Créer une boîte de dialogue personnalisée
-    const modal = document.createElement("div");
-    modal.classList.add("profile-modal");
-    modal.innerHTML = `
-      <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <h2>Mehdi El MENSI</h2>
-        <p><strong>Formation :</strong> BTS SIO - SISR</p>
-        <p><strong>Email :</strong> mehdi.elmensi.pro@gmail.com</p>
-        <p><strong>Compétences :</strong> Réseaux, Sécurité, Développement</p>
-        <button id="download-cv">📄 Télécharger CV</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Gérer la fermeture de la boîte de dialogue
-    modal.querySelector(".close-modal").addEventListener("click", function () {
-      modal.remove();
-    });
-
-    // Télécharger le CV au clic
-    document.getElementById("download-cv").addEventListener("click", function () {
-      window.open("https://drive.google.com/file/d/1mCH4F_32gosdeWtPYyvaDiibQk-hniSu/view?usp=sharing", "_blank");
-    });
-
-    // Fermer la boîte si l'utilisateur clique en dehors du contenu
-    modal.addEventListener("click", function (event) {
-      if (event.target === modal) {
-        modal.remove();
-      }
-    });
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Sélectionner le bouton de téléchargement
-  const lmButton = document.querySelector(".lm-download");
-
-  // ## GESTION DE L'ÉVÉNEMENT CLICK
-  // Configurer l'action lors du clic sur le bouton
-  lmButton.addEventListener("click", function (event) {
-    // Empêcher le comportement par défaut du lien
-    event.preventDefault();
-
-    // ## CRÉATION DE L'INTERFACE MODALE
-    // Créer l'élément modal qui contiendra tout
-    const modal = document.createElement("div");
-    modal.classList.add("lm-modal");
-    
-    // Insérer le HTML du modal avec toute la structure
-    modal.innerHTML = `
-      <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <h2>📝 Générateur de Lettre de Motivation</h2>
-        
-        <!-- Options de modification -->
-        <div class="edit-options">
-          <div class="edit-option">
-            <input type="radio" id="edit-company" name="edit-type" value="company" checked>
-            <label for="edit-company">Modifier l'entreprise</label>
-          </div>
-          <div class="edit-option">
-            <input type="radio" id="edit-objective" name="edit-type" value="objective">
-            <label for="edit-objective">Modifier l'objectif (stage/alternance/emploi)</label>
-          </div>
-          <div class="edit-option">
-            <input type="radio" id="edit-content" name="edit-type" value="content">
-            <label for="edit-content">Modifier le contenu principal</label>
-          </div>
-          <div class="edit-option">
-            <input type="radio" id="edit-all" name="edit-type" value="all">
-            <label for="edit-all">Tout modifier</label>
-          </div>
-        </div>
-        
-        <!-- Formulaire d'édition dynamique -->
-        <div id="edit-form" class="edit-form">
-          <!-- Le contenu sera inséré dynamiquement -->
-        </div>
-        
-        <!-- Prévisualisation de la lettre de motivation -->
-        <div id="lm-editor" class="editable-content">
-          <div class="container">
-            <div class="header">
-              <p>Mehdi El Mensi<br>
-              8 rue Victor Schoelcher, 33270 Floirac<br>
-              07 69 18 21 07<br>
-              <a href="mailto:Mehdi.elmensi.pro@gmail.com">Mehdi.elmensi.pro@gmail.com</a></p>
-            </div>
-
-              <div class="content">
-                <h2>Lettre de Motivation</h2>
-
-                <p>Madame, Monsieur,</p>
-
-                <p>Actuellement en deuxième année de BTS Services Informatiques aux Organisations, je souhaite poursuivre mes études en <span class="objective">alternance</span> en intégrant un environnement stimulant et stratégique. C'est dans cette optique que je vous soumets ma candidature pour le poste d'<span class="position">Alternant Acheteur Informatique</span> au sein du Groupe <span class="company">VINCI</span>.</p>
-
-                <p>Passionné par l'informatique et ses enjeux économiques, je m'intéresse particulièrement à la gestion des achats IT et à l'optimisation des relations fournisseurs. Mon parcours en systèmes et réseaux m'a permis d'acquérir des connaissances techniques essentielles sur les infrastructures, les logiciels et les services numériques, me donnant ainsi une vision globale du marché IT.</p>
-
-                <p>Rigoureux et organisé, je suis capable d'analyser des besoins, de structurer des processus d'achat et de participer activement à la mise en place de contrats et d'accords-cadres. Mon aisance relationnelle et ma capacité à communiquer efficacement, en français comme en anglais, me permettent de collaborer avec divers interlocuteurs, qu'il s'agisse de fournisseurs, d'équipes techniques ou de directions opérationnelles.</p>
-
-                <p>Rejoindre <span class="company">VINCI</span> serait une opportunité unique pour développer mes compétences en achats IT dans un environnement dynamique et international. Je suis prêt à m'investir pleinement dans les missions qui me seront confiées et à apporter ma motivation et ma curiosité au sein de vos équipes.</p>
-
-                <p>Je reste à votre disposition pour un entretien afin d'échanger sur ma candidature. Dans l'attente de votre retour, veuillez agréer, Madame, Monsieur, mes salutations distinguées.</p>
-              </div>
-
-            <div class="signature">
-              <p>Mehdi El Mensi</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Boutons d'action -->
-        <div class="lm-buttons">
-          <button id="generate-pdf">📄 Télécharger en PDF</button>
-        </div>
-      </div>
-    `;
-    
-    // ## STYLES CSS
-    // Créer et appliquer les styles pour le modal
-    const style = document.createElement('style');
-    style.textContent = `
-      /* Styles pour le modal et son positionnement */
-      .lm-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      
-      /* Contenu du modal */
-      .modal-content {
-        background-color: #1e1e1e;
-        color: #a8b8fa;
-        padding: 25px;
-        border-radius: 10px;
-        width: 85%;
-        max-width: 900px;
-        max-height: 85vh;
-        overflow-y: auto;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      }
-      
-      /* Bouton de fermeture */
-      .close-modal {
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        color: #e0e0e0;
-      }
-      
-      /* Section d'options d'édition */
-      .edit-options {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        margin: 20px 0;
-        padding: 15px;
-        background-color: #2a2a2a;
-        border-radius: 8px;
-      }
-      
-      /* Option individuelle */
-      .edit-option {
-        margin-right: 15px;
-        color:rgb(224, 224, 224);
-      }
-      
-      /* Formulaire d'édition */
-      .edit-form {
-        margin: 20px 0;
-        padding: 15px;
-        background-color: #2d2d2d;
-        border-radius: 8px;
-        border: 1px solid #444;
-      }
-      
-      /* Groupe de formulaire */
-      .form-group {
-        margin-bottom: 15px;
-      }
-      
-      /* Étiquettes de formulaire */
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #e0e0e0;
-      }
-      
-      /* Champs de formulaire */
-      .form-group input, .form-group textarea, .form-group select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #555;
-        border-radius: 4px;
-        background-color: #333;
-        color: #e0e0e0;
-      }
-      
-      /* Zone de texte */
-      .form-group textarea {
-        min-height: 100px;
-        background-color: #333;
-        color: #e0e0e0;
-      }
-      
-      /* Zone éditable */
-      .editable-content {
-        padding: 20px;
-        margin: 20px 0;
-        min-height: 300px;
-        background-color: #2d2d2d;
-        color: #e0e0e0;
-      }
-      
-      /* Section des boutons */
-      .lm-buttons {
-        text-align: center;
-        margin-top: 20px;
-      }
-      
-      /* Style des boutons */
-      .lm-buttons button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        margin: 0 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      
-      /* Hover sur les boutons */
-      .lm-buttons button:hover {
-        background-color: #3e8e41;
-      }
-      
-      /* Style du conteneur de lettre */
-      #lm-editor .container {
-        font-family: 'Georgia', serif;
-        background-color:rgb(255, 255, 255);
-        color:rgb(0, 0, 0);
-        padding: 30px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        border-left: 3px solid #4a8fff;
-      }
-
-      /* En-tête de lettre */
-      #lm-editor .header {
-        text-align: right;
-        font-size: 14px;
-        line-height: 1.6;
-        margin-bottom: 30px;
-        color:rgb(0, 0, 0);
-      }
-
-      /* Corps de la lettre */
-      #lm-editor .content {
-        text-align: justify;
-        font-size: 16px;
-        line-height: 1.8;
-        color:rgb(0, 0, 0);
-      }
-
-      /* Titre de la lettre */
-      #lm-editor .content h2 {
-        text-align: center;
-        color: #4a8fff;
-        margin-bottom: 25px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 22px;
-      }
-
-      /* Signature */
-      #lm-editor .signature {
-        margin-top: 40px;
-        font-weight: bold;
-        text-align: center;
-        font-size: 16px;
-        color: #4a8fff;
-      }
-      
-      /* Bouton Appliquer */
-      .apply-btn {
-        background-color: #4a8fff;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-      
-      /* Hover sur bouton Appliquer */
-      .apply-btn:hover {
-        background-color: #3a7fef;
-      }
-    `;
-    
-    // Ajouter les styles et le modal au DOM
-    document.head.appendChild(style);
-    document.body.appendChild(modal);
-
-    // ## TEMPLATES DE FORMULAIRES
-    // Définition des templates HTML pour chaque type d'édition
-    const templates = {
-      // Template pour modification d'entreprise
-      company: `
-        <div class="form-group">
-          <label for="company-name">Nom de l'entreprise :</label>
-          <input type="text" id="company-name" value="VINCI">
-        </div>
-        <div class="form-group">
-          <label for="position-name">Intitulé du poste :</label>
-          <input type="text" id="position-name" value="Alternant Acheteur Informatique">
-        </div>
-        <button class="apply-btn" id="apply-company">Appliquer</button>
-      `,
-      
-      // Template pour modification d'objectif
-      objective: `
-        <div class="form-group">
-          <label for="objective-type">Type d'objectif :</label>
-          <select id="objective-type">
-            <option value="alternance">Alternance</option>
-            <option value="stage">Stage</option>
-            <option value="emploi">Emploi</option>
-            <option value="job d'été">Job d'été</option>
-          </select>
-        </div>
-        <button class="apply-btn" id="apply-objective">Appliquer</button>
-      `,
-      
-      // Template pour modification du contenu
-      content: `
-        <div class="form-group">
-          <label for="content-text">Contenu principal de la lettre :</label>
-          <textarea id="content-text" rows="10">Actuellement en deuxième année de BTS Services Informatiques aux Organisations, je souhaite poursuivre mes études en alternance en intégrant un environnement stimulant et stratégique. C'est dans cette optique que je vous soumets ma candidature pour le poste d'Alternant Acheteur Informatique au sein du Groupe VINCI.
-
-Passionné par l'informatique et ses enjeux économiques, je m'intéresse particulièrement à la gestion des achats IT et à l'optimisation des relations fournisseurs. Mon parcours en systèmes et réseaux m'a permis d'acquérir des connaissances techniques essentielles sur les infrastructures, les logiciels et les services numériques, me donnant ainsi une vision globale du marché IT.
-
-Rigoureux et organisé, je suis capable d'analyser des besoins, de structurer des processus d'achat et de participer activement à la mise en place de contrats et d'accords-cadres. Mon aisance relationnelle et ma capacité à communiquer efficacement, en français comme en anglais, me permettent de collaborer avec divers interlocuteurs, qu'il s'agisse de fournisseurs, d'équipes techniques ou de directions opérationnelles.
-
-Rejoindre VINCI serait une opportunité unique pour développer mes compétences en achats IT dans un environnement dynamique et international. Je suis prêt à m'investir pleinement dans les missions qui me seront confiées et à apporter ma motivation et ma curiosité au sein de vos équipes.</textarea>
-        </div>
-        <button class="apply-btn" id="apply-content">Appliquer</button>
-      `,
-      
-      // Template pour tout modifier
-      all: `
-        <div id="custom-fields">
-          <div class="form-group">
-            <label for="all-company">Nom de l'entreprise :</label>
-            <input type="text" id="all-company" value="VINCI">
-          </div>
-          <div class="form-group">
-            <label for="all-position">Intitulé du poste :</label>
-            <input type="text" id="all-position" value="Alternant Acheteur Informatique">
-          </div>
-          <div class="form-group">
-            <label for="all-objective">Type d'objectif :</label>
-            <select id="all-objective">
-              <option value="alternance">Alternance</option>
-              <option value="stage">Stage</option>
-              <option value="emploi">Emploi</option>
-              <option value="job d'été">Job d'été</option>
-            </select>
-          </div>
-        </div>
-        <button class="apply-btn" id="apply-all">Appliquer</button>
-      `
-    };
-
-    // ## FONCTIONS DE GESTION DE FORMULAIRE
-    // Mettre à jour le formulaire en fonction de l'option choisie
-    function updateForm() {
-      // Récupérer le type d'édition sélectionné
-      const selectedType = document.querySelector('input[name="edit-type"]:checked').value;
-      // Insérer le template correspondant dans le formulaire
-      document.getElementById('edit-form').innerHTML = templates[selectedType];
-      
-      // Ajouter les écouteurs d'événements pour les boutons d'application
-      if (selectedType === 'company') {
-        document.getElementById('apply-company').addEventListener('click', applyCompanyChanges);
-      } else if (selectedType === 'objective') {
-        document.getElementById('apply-objective').addEventListener('click', applyObjectiveChanges);
-      } else if (selectedType === 'content') {
-        document.getElementById('apply-content').addEventListener('click', applyContentChanges);
-      } else if (selectedType === 'all') {
-        document.getElementById('apply-all').addEventListener('click', applyAllChanges);
-        
-        // Écouteur pour les modèles prédéfinis
-        document.getElementById('predefined-templates').addEventListener('change', function() {
-          const template = this.value;
-          // Appliquer le template prédéfini si sélectionné
-          if (template && predefinedTemplates[template]) {
-            document.getElementById('all-position').value = predefinedTemplates[template].position;
-            document.getElementById('all-content').value = predefinedTemplates[template].content;
-          }
-        });
-      }
-    }
-
-    // ## FONCTIONS D'APPLICATION DES MODIFICATIONS
-    // Appliquer les modifications d'entreprise
-    function applyCompanyChanges() {
-      const companyName = document.getElementById('company-name').value;
-      const positionName = document.getElementById('position-name').value;
-      
-      // Mettre à jour toutes les instances de l'entreprise
-      document.querySelectorAll('#lm-editor .company').forEach(el => {
-        el.textContent = companyName;
-      });
-      
-      // Mettre à jour le poste
-      document.querySelector('#lm-editor .position').textContent = positionName;
-    }
-
-    // Appliquer les modifications d'objectif
-    function applyObjectiveChanges() {
-      const objectiveType = document.getElementById('objective-type').value;
-      
-      // Mettre à jour l'objectif
-      document.querySelectorAll('#lm-editor .objective').forEach(el => {
-        el.textContent = objectiveType;
-      });
-    }
-
-    // Appliquer les modifications de contenu
-    function applyContentChanges() {
-      const contentText = document.getElementById('content-text').value;
-      
-      // Diviser le contenu en paragraphes
-      const paragraphs = contentText.split('\n\n');
-      
-      // Récupérer le contenu existant
-      const contentDiv = document.querySelector('#lm-editor .content');
-      
-      // Conserver le titre et le premier paragraphe (Madame, Monsieur)
-      const title = contentDiv.querySelector('h2');
-      const greeting = contentDiv.querySelector('p');
-      
-      // Vider le contenu actuel
-      contentDiv.innerHTML = '';
-      
-      // Restaurer le titre et le premier paragraphe
-      contentDiv.appendChild(title);
-      contentDiv.appendChild(greeting);
-      
-      // Ajouter les nouveaux paragraphes avec marquage des variables
-      paragraphs.forEach(para => {
-        const p = document.createElement('p');
-        p.innerHTML = para.replace(/VINCI/g, '<span class="company">VINCI</span>')
-                         .replace(/alternance/g, '<span class="objective">alternance</span>')
-                         .replace(/Alternant Acheteur Informatique/g, '<span class="position">Alternant Acheteur Informatique</span>');
-        contentDiv.appendChild(p);
-      });
-    }
-
-    // Appliquer toutes les modifications
-    function applyAllChanges() {
-      const company = document.getElementById('all-company').value;
-      const position = document.getElementById('all-position').value;
-      const objective = document.getElementById('all-objective').value;
-      const content = document.getElementById('all-content').value;
-      
-      // Mettre à jour l'entreprise
-      document.querySelectorAll('#lm-editor .company').forEach(el => {
-        el.textContent = company;
-      });
-      
-      // Mettre à jour l'objectif
-      document.querySelectorAll('#lm-editor .objective').forEach(el => {
-        el.textContent = objective;
-      });
-      
-      // Mettre à jour le poste
-      document.querySelector('#lm-editor .position').textContent = position;
-      
-      // Mettre à jour le contenu
-      const contentDiv = document.querySelector('#lm-editor .content');
-      const title = contentDiv.querySelector('h2');
-      const greeting = contentDiv.querySelector('p');
-      
-      // Réinitialiser et reconstruire le contenu
-      contentDiv.innerHTML = '';
-      contentDiv.appendChild(title);
-      contentDiv.appendChild(greeting);
-      
-      // Ajouter les nouveaux paragraphes avec marquage des variables
-      const paragraphs = content.split('\n\n');
-      paragraphs.forEach(para => {
-        const p = document.createElement('p');
-        p.innerHTML = para.replace(new RegExp(company, 'g'), `<span class="company">${company}</span>`)
-                         .replace(new RegExp(objective, 'g'), `<span class="objective">${objective}</span>`)
-                         .replace(new RegExp(position, 'g'), `<span class="position">${position}</span>`);
-        contentDiv.appendChild(p);
-      });
-    }
-
-    // ## ÉCOUTEURS D'ÉVÉNEMENTS
-    // Écouteurs pour les boutons radio
-    document.querySelectorAll('input[name="edit-type"]').forEach(radio => {
-      radio.addEventListener('change', updateForm);
-    });
-
-    // Initialiser le formulaire avec l'option par défaut
-    updateForm();
-
-    // ## GESTION DE FERMETURE
-    // Gestion du bouton de fermeture
-    const closeBtn = modal.querySelector(".close-modal");
-    closeBtn.addEventListener("click", function() {
-      modal.remove();
-      style.remove();
-    });
-
-    // Fermer le modal en cliquant à l'extérieur
-    modal.addEventListener("click", function(event) {
-      if (event.target === modal) {
-        modal.remove();
-        style.remove();
-      }
-    });
-
-    // ## GÉNÉRATION DE PDF
-    // Écouteur pour le bouton de génération PDF
-    
-    document.getElementById("generate-pdf").addEventListener("click", function() {
-      // Vérifier si les bibliothèques sont chargées
-      if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-        // Charger les bibliothèques si nécessaire
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', function() {
-          loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function() {
-            generatePDF();
-          });
-        });
-      } else {
-        generatePDF();
-      }
-    });
-
-    function loadScript(url, callback) {
-      const script = document.createElement("script");
-      script.src = url;
-      script.onload = callback;
-      document.head.appendChild(script);
-    }
-
-    function generatePDF() {
-      const element = document.querySelector("#lm-editor .container");
-      
-      html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-      }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
-        
-        const imgWidth = 210; // A4 width
-        const pageHeight = 297; // A4 height
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save('Lettre_Motivation_Mehdi_El_Mensi.pdf');
-      });
-    }
-  });
-});
-
-// =========================================
 // * Bouton 
 // =========================================
 document.addEventListener('DOMContentLoaded', function() {
-  const btnClassique = document.getElementById('btn-classique');
-  const btnSISR = document.getElementById('btn-sisr');
-  const btnSLAM = document.getElementById('btn-slam');
+  const btn1 = document.getElementById('btn-1');
+  const btn2 = document.getElementById('btn-2');
+  const btn3 = document.getElementById('btn-3');
   const contentDiv = document.getElementById('bts-content');
-
-  // Content for each mode
   const contentClassique = `
     <p>
-      Le BTS Services Informatiques aux Organisations (<strong class="txtsio">SIO</strong>) est un diplôme Bac+2 destiné à former des professionnels de l'informatique.  
-      Cette formation permet d’acquérir des compétences en administration des systèmes et réseaux (<strong class="txtsisr">SISR</strong>) ou en développement d’applications (<strong class="txtslam">SLAM</strong>).
+      Le <strong>BTS SIO option SISR</strong> (Solutions d'Infrastructure, Systèmes et Réseaux) a constitué le socle technique de mon parcours, me permettant d'acquérir une rigueur opérationnelle en administration de services et sécurisation des infrastructures.
     </p>
-    <h3>📊 Comparatif des Deux Options</h3>
+
+    <h3>🎯 Objectifs de la Formation</h3>
+    <ul>
+      <li><strong>Expertise Technique :</strong> Maîtrise des couches réseau et des environnements systèmes complexes.</li>
+      <li><strong>Ingénierie d'Infrastructure :</strong> Capacité à déployer, administrer et optimiser des parcs IT.</li>
+      <li><strong>Gestion de Projets :</strong> Collaboration en mode projet sur des déploiements d'infrastructures réelles.</li>
+      <li><strong>Sécurité by Design :</strong> Développement d'une approche nativement sécurisée et optimisée des systèmes.</li>
+    </ul>
+
+    <h3>📚 Domaines d'Enseignement Spécialisés</h3>
     <table class="bts-table">
       <thead>
         <tr>
-          <th>🖥️ SISR (Systèmes & Réseaux)</th>
-          <th>💻 SLAM (Développement Logiciel)</th>
+          <th>Pôle Infrastructures</th>
+          <th>Pôle Gouvernance & Méthodes</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>🔹 Administration des serveurs et réseaux</td>
-          <td>🔹 Développement d'applications (Web, mobile, logiciel)</td>
+          <td>🖥️ <strong>Systèmes & Réseaux :</strong> Administration Windows Server, Distributions Linux, Équipements Cisco.</td>
+          <td>🛡️ <strong>Cybersécurité :</strong> Fondamentaux de la sécurité informatique et durcissement.</td>
         </tr>
         <tr>
-          <td>🔹 Sécurité informatique et cybersécurité</td>
-          <td>🔹 Bases de données et SQL</td>
+          <td>💻 <strong>Développement & Data :</strong> Automatisation (Python), SQL, intégration Web (HTML/JS/PHP).</td>
+          <td>📊 <strong>Gestion de Projet :</strong> Pilotage via méthodologies Agiles et framework Scrum.</td>
         </tr>
         <tr>
-          <td>🔹 Maintenance et support technique</td>
-          <td>🔹 Programmation en divers langages (Java, Python, PHP...)</td>
-        </tr>
-        <tr>
-          <td>🔹 Virtualisation et Cloud Computing</td>
-          <td>🔹 Gestion de projet en méthode Agile</td>
-        </tr>
-        <tr>
-          <td>🎯 Objectif : Administrer et sécuriser les infrastructures IT</td>
-          <td>🎯 Objectif : Concevoir, coder et optimiser des logiciels</td>
+          <td>📡 <strong>Protocoles :</strong> Configuration avancée et segmentation réseau.</td>
+          <td>🌍 <strong>Communication :</strong> Anglais technique et communication professionnelle en milieu IT.</td>
         </tr>
       </tbody>
     </table>
-    <h3>🎯 Objectifs du BTS SIO</h3>
-    <ul>
-      <li> Acquérir une expertise en informatique (réseaux ou développement)</li>
-      <li> Être capable de gérer des infrastructures IT ou concevoir des logiciels</li>
-      <li> Travailler en équipe sur des projets informatiques concrets</li>
-      <li> Développer une approche sécurisée et optimisée des systèmes</li>
-    </ul>
-    <h3>📚 Matières enseignées</h3>
-    <ul>
-      <li>🖥️ Systèmes et réseaux : Windows Server, Linux, Cisco</li>
-      <li>💻 Développement : HTML, CSS, JavaScript, PHP, Python, SQL</li>
-      <li>🛡️ Sécurité informatique et cybersécurité</li>
-      <li>📊 Gestion de projet (Méthodologie Agile, Scrum)</li>
-      <li>🌍 Anglais technique & Communication professionnelle</li>
-    </ul>
+
     <p>
-      Pendant ma formation en option SISR, j’ai acquis des compétences en administration de serveurs, gestion de la sécurité des réseaux et support technique.  
-      Mes stages m’ont permis de mettre en pratique ces connaissances dans un environnement professionnel.
+      Durant mon cursus SISR, j'ai consolidé des compétences critiques en <strong>administration de serveurs</strong>, <strong>gestion de la sécurité périmétrique</strong> et <strong>maintien en condition opérationnelle (MCO)</strong> via le support technique spécialisé. 
+      Mes immersions professionnelles en entreprise ont été l'occasion d'éprouver ces connaissances sur des infrastructures critiques.
     </p>
   `;
 
-  const contentSISR = `
+  const contentBachelor = `
     <p>
-      Le BTS SIO en option <strong class="txtsisr">SISR</strong> se concentre sur l'administration des systèmes et réseaux.  
-      Cette voie forme des experts capables de gérer des serveurs, assurer la sécurité des réseaux et maintenir les infrastructures IT.
+      Le <strong>Bachelor Cybersécurité & Ethical Hacking</strong> à l'EFREI Bordeaux m'a permis de passer d'un profil administrateur à celui d'analyste en sécurité, avec une forte orientation <strong>sécurité offensive</strong> et <strong>protection des actifs critiques</strong>.
     </p>
-    <h3>🔍 Focus SISR</h3>
+    
+    <h3>🔍 Expertise "Ethical Hacking" & Technique</h3>
     <ul>
-      <li>🔹 Administration des serveurs et réseaux</li>
-      <li>🔹 Sécurité informatique et cybersécurité</li>
-      <li>🔹 Maintenance et support technique</li>
-      <li>🔹 Virtualisation et Cloud Computing</li>
+      <li>🔹 <strong>Tests d'intrusion (Pentesting) :</strong> Audit de vulnérabilités, exploitation de failles et rédaction de rapports de remédiation.</li>
+      <li>🔹 <strong>Hardening & Protection :</strong> Mise en œuvre de stratégies de défense des données et durcissement des systèmes d'exploitation.</li>
+      <li>🔹 <strong>Sécurité Logicielle :</strong> Analyse des vecteurs d'attaque applicatifs et sécurisation du cycle de développement.</li>
+      <li>🔹 <strong>Audit de Configuration :</strong> Vérification de la conformité des infrastructures réseaux et solutions Cloud.</li>
     </ul>
-    <h3>🎯 Objectifs SISR</h3>
+
+    <h3>🛡️ Cœur du Programme Technologique</h3>
+    <table class="bts-table">
+      <thead>
+        <tr>
+          <th>Domaine</th>
+          <th>Compétences Clés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Systèmes & Cloud</strong></td>
+          <td>Virtualisation avancée, durcissement OS, solutions Cloud sécurisées.</td>
+        </tr>
+        <tr>
+          <td><strong>Infrastructures</strong></td>
+          <td>Architecture réseau sécurisée et gestion de projets systèmes complexes.</td>
+        </tr>
+        <tr>
+          <td><strong>Stratégie Cyber</strong></td>
+          <td>Protection des données, conformité RNCP Niv. 6 et gouvernance.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>🎯 Objectifs de Spécialisation</h3>
     <ul>
-      <li> Maîtriser l'administration des infrastructures IT</li>
-      <li> Assurer la sécurité et la continuité des services</li>
-      <li> Gérer les incidents et réaliser des diagnostics</li>
-      <li> Optimiser la performance des systèmes</li>
+      <li><strong>Anticiper :</strong> Identifier les menaces cybercriminelles émergentes.</li>
+      <li><strong>Sécuriser :</strong> Maîtriser l'arsenal technique pour renforcer la résilience des organisations.</li>
+      <li><strong>Éthique :</strong> Appliquer une démarche de "Hacker Éthique" dans un cadre légal et professionnel.</li>
     </ul>
-    <h3>📚 Matières enseignées en SISR</h3>
-    <ul>
-      <li>🖥️ Systèmes d'exploitation (Linux, Windows Server)</li>
-      <li>🔧 Outils de virtualisation et Cloud</li>
-      <li>🛡️ Sécurité des réseaux</li>
-      <li>📊 Gestion des infrastructures IT</li>
-      <li>📡 Protocoles réseaux et configuration</li>
-    </ul>
-    <p>
-      Cette spécialisation permet d’acquérir des compétences pointues pour gérer et sécuriser les réseaux d'entreprise, essentielles dans un monde de plus en plus connecté.
+
+<p>
+      Diplômé en tant qu'<strong>>Administrateur systèmes, réseaux et cybersécurité (Titre RNCP Niveau 6)</strong>, cette année a consolidé ma capacité à intervenir sur des architectures d'entreprise tout en garantissant un niveau de sécurité maximal.
     </p>
+    <p>Lien vers le titre RNCP: <a href="https://www.francecompetences.fr/recherche/rncp/39611/" target="_blank" style="color: inherit; text-decoration: underline;">RNCP39611</a></p>
   `;
 
-  const contentSLAM = `
+const contentMaster = `
     <p>
-      Le BTS SIO en option <strong class="txtslam">SLAM</strong> se focalise sur le développement de solutions logicielles.  
-      Cette voie forme des professionnels capables de concevoir, développer et maintenir des applications web, mobiles et logicielles.
+      Actuellement en <strong>Master Informatique parcours Conception de Systèmes et Cybersécurité</strong> à l'UPEC, je me spécialise dans l'intégration de la sécurité sur l'ensemble du cycle de vie logiciel et des infrastructures connectées.
     </p>
-    <h3>🔍 Focus SLAM</h3>
+
+    <h3>🔍 Expertise en Ingénierie & Cybersécurité</h3>
     <ul>
-      <li>🔹 Développement d'applications (Web, mobile, logiciel)</li>
-      <li>🔹 Conception et modélisation de bases de données</li>
-      <li>🔹 Programmation dans divers langages (Java, Python, PHP...)</li>
-      <li>🔹 Gestion de projet en méthode Agile</li>
+      <li>🔹 <strong>Conception Sécurisée :</strong> Élaboration d'architectures logicielles et systèmes nativement protégées (Security by Design).</li>
+      <li>🔹 <strong>Sécurité IoT & Embarquée :</strong> Analyse et sécurisation des protocoles dédiés à l'Internet des Objets et aux systèmes communicants.</li>
+      <li>🔹 <strong>Audit & Remédiation :</strong> Identification des cybermenaces, analyse de vulnérabilités et mise en œuvre de solutions correctives.</li>
+      <li>🔹 <strong>Développement Avancé :</strong> Maîtrise des paradigmes de programmation sécurisée pour les applications Cloud et traditionnelles.</li>
     </ul>
-    <h3>🎯 Objectifs SLAM</h3>
+
+    <h3>🛡️ Compétences Métiers Visées</h3>
+    <table class="bts-table">
+      <thead>
+        <tr>
+          <th>Axe Opérationnel</th>
+          <th>Expertise Technique</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ingénierie Cyber</strong></td>
+          <td>Architecture logicielle, Pentesting et audit de sécurité applicative.</td>
+        </tr>
+        <tr>
+          <td><strong>Gestion de Projet</strong></td>
+          <td>Rédaction de cahiers des charges sécurisés et déploiement de solutions.</td>
+        </tr>
+        <tr>
+          <td><strong>Innovation IoT</strong></td>
+          <td>Conception de systèmes embarqués sécurisés et architectures Cloud.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>🎯 Objectifs de mon Alternance</h3>
     <ul>
-      <li> Maîtriser le développement d'applications</li>
-      <li> Concevoir des solutions logicielles innovantes</li>
-      <li> Gérer des projets de développement en équipe</li>
-      <li> Optimiser la performance et la sécurité des applications</li>
+      <li><strong>Analyser :</strong> Évaluer les opportunités et la faisabilité technologique des projets complexes.</li>
+      <li><strong>Intégrer :</strong> Déployer des solutions de sécurité dès la phase de conception du logiciel.</li>
+      <li><strong>Optimiser :</strong> Réaliser des audits critiques sur des infrastructures existantes pour en durcir la résilience.</li>
     </ul>
-    <h3>📚 Matières enseignées en SLAM</h3>
-    <ul>
-      <li>💻 Langages de programmation (HTML, CSS, JavaScript, PHP, Python, Java)</li>
-      <li>📊 Bases de données et SQL</li>
-      <li>🛠️ Frameworks et outils de développement</li>
-      <li>🚀 Conception d'applications (Mobile, Web)</li>
-      <li>🔍 Méthodologies Agile et Scrum</li>
-    </ul>
+
     <p>
-      Cette spécialisation permet d'acquérir des compétences en développement pour répondre aux besoins croissants en solutions logicielles sur mesure.
+      Ce cursus au sein de l'<strong>UFR de Sciences et Technologie</strong> me prépare à devenir un acteur clé de la défense des SI, capable de piloter des projets d'envergure en tant qu'Ingénieur Expert en Cybersécurité.
     </p>
   `;
 
@@ -1811,165 +575,690 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Listeners for mode buttons
-  btnClassique.addEventListener('click', function() {
-    setActiveContent(contentClassique, btnClassique);
+  btn1.addEventListener('click', function() {
+    setActiveContent(contentClassique, btn1);
   });
 
-  btnSISR.addEventListener('click', function() {
-    setActiveContent(contentSISR, btnSISR);
+  btn2.addEventListener('click', function() {
+    setActiveContent(contentBachelor, btn2);
   });
 
-  btnSLAM.addEventListener('click', function() {
-    setActiveContent(contentSLAM, btnSLAM);
+  btn3.addEventListener('click', function() {
+    setActiveContent(contentMaster, btn3);
   });
 });
 
-// =========================================
-// * Playlist 
-// =========================================
-document.addEventListener("DOMContentLoaded", function () {
-  const audio = document.getElementById("background-music");
-  const audioSource = document.getElementById("audio-source");
-  const playPauseBtn = document.getElementById("play-pause-music");
-  const prevBtn = document.getElementById("prev-music");
-  const nextBtn = document.getElementById("next-music");
-  const musicBox = document.querySelector(".music-box");
-  const musicIcon = document.querySelector(".music-icon");
-  const trackName = document.getElementById("current-track-name");
-  const trackImage = document.getElementById("current-track-image");
-  const progressBar = document.getElementById("progress-bar");
-  const progressContainer = document.getElementById("progress-container");
-  const timeDisplay = document.getElementById("time-display");
-  const playlistSelect = document.getElementById("playlist-select");
 
-  let isLocked = false;
 
-  // 🎵 Définition des Playlists
-  const playlists = {
-      "Lofi": [
-          { title: "Lofi Relax", image: "images/Soundbox/lofi/lofigirl.jpg", src: "sounds/Lofi/lofi-295209.mp3" },
-          { title: "Chill Vibes", image: "images/Soundbox/lofi/lofiboy.jpg", src: "sounds/Lofi/good-night-lofi-cozy-chill-music-160166.mp3" }
-      ],
-      "Dofus": [
-        { title: "Dofus", image: "images/Soundbox/dofus/images.jpg", src: "sounds/dofus/01. Dofus Ouverture.mp3" }
-    ],
-    "Hunter X Hunter": [
-      { title: "Hunter x Hunter Themes", image: "images/Soundbox/Hunter x hunter/aa58e072336a5c746dd4e361a6ff4ae808abf7efeaa5bfe6986f4c3eac601421.jpg", src: "sounds/Hunter x hunter/Hunter x hunter Ending 1 - Just awake_default.mp3" },
-      { title: "Zoldick Themes", image: "images/Soundbox/Hunter x hunter/Famille-Zoldyck-hxh.jpg", src: "sounds/Hunter x hunter/hunter-x-hunter_zoldyck-family.mp3" }
-  ],
-  "Minecraft": [
-    { title: "Minecraft - default", image: "images/Soundbox/Minecraft/2x1_NSwitch_Minecraft_image1600w.jpg", src:"sounds/Minecraft/1-08. Minecraft.mp3"},
-    { title: "Minecraft - key", image: "images/Soundbox/Minecraft/raw.jpg", src:"sounds/Minecraft/1-01. Key.mp3" }
-],
-"Overlord": [
-  { title: "Voracity", image: "images/Soundbox/Overlord/1010x505-017.png", src: "sounds/Overlord/VORACITY (osanime.com).mp3" }
-],
-"Paper Mario": [
-  { title: "Paper mario Stolen spirit", image: "images/Soundbox/Paper Mario/hqdefault.jpg", src: "sounds/Paper Mario/01. Story of the Stolen Spirits.mp3" },
-  { title: "Paper Mario - 03", image: "images/Soundbox/Paper Mario/paper-mario--la-porte-millnaire-17-1300x400.jpg", src: "sounds/Paper Mario/03. File Select.mp3" }
-],
+/**
+ * ============================================================
+ *  GitHubExplorer — Explorateur de repo GitHub vanilla JS
+ *  Portfolio Edition — Mehdi EL MENSI
+ * ============================================================
+ *
+ *  USAGE :
+ *    const explorer = new GitHubExplorer('#mon-conteneur', {
+ *      repos: ['user/repo1', 'user/repo2'],
+ *      defaultRepo: 'user/repo1',  // (optionnel)
+ *      token: 'ghp_...'            // (optionnel, augmente le rate limit)
+ *    });
+ *    explorer.init();
+ * ============================================================
+ */
+ 
+class GitHubExplorer {
+ 
+  // ----------------------------------------------------------
+  //  Icônes par extension / type de fichier
+  // ----------------------------------------------------------
+  static FILE_ICONS = {
+    // Langages
+    js   : '🟨', ts   : '🔷', py   : '🐍', java : '☕',
+    php  : '🐘', rb   : '💎', go   : '🔵', rs   : '🦀',
+    cs   : '🔷', cpp  : '⚙️',  c    : '⚙️',  sh   : '🐚',
+    ps1  : '💙', bat  : '🖥️',
+    // Web
+    html : '🌐', css  : '🎨', scss : '🎨', sass : '🎨',
+    vue  : '💚', jsx  : '⚛️',  tsx  : '⚛️',
+    // Data / Config
+    json : '📦', yaml : '⚙️',  yml  : '⚙️',  toml : '⚙️',
+    xml  : '📋', csv  : '📊', sql  : '🗃️',
+    env  : '🔑', lock : '🔒',
+    // Docs
+    md   : '📝', txt  : '📄', pdf  : '📕', doc  : '📘',
+    docx : '📘', xls  : '📗', xlsx : '📗', ppt  : '📙',
+    // Media
+    png  : '🖼️',  jpg  : '🖼️',  jpeg : '🖼️',  gif  : '🖼️',
+    svg  : '✏️',  ico  : '🔸', mp4  : '🎬', mp3  : '🎵',
+    // Divers
+    zip  : '📦', tar  : '📦', gz   : '📦',
+    log  : '📋', pem  : '🔐', crt  : '🔐',
   };
-
-  // 🎶 Création de la playlist "Tout" (contient toutes les musiques)
-  const allTracks = [];
-  Object.values(playlists).forEach(tracks => allTracks.push(...tracks));
-
-  // 🏷️ Ajout des playlists au menu déroulant
-  Object.keys(playlists).forEach(playlist => {
-      const option = document.createElement("option");
-      option.value = playlist;
-      option.textContent = playlist;
-      playlistSelect.appendChild(option);
-  });
-
-  let currentPlaylist = playlists["All"]; // Par défaut : toutes les musiques
-  let currentTrack = 0;
-
-  // 📌 Fonction pour mettre à jour la musique
-  function updateTrack(index) {
-      if (index < 0) index = currentPlaylist.length - 1;
-      if (index >= currentPlaylist.length) index = 0;
-      currentTrack = index;
-      audio.pause();
-      audioSource.src = currentPlaylist[currentTrack].src;
-      audio.load();
-      trackName.innerText = currentPlaylist[currentTrack].title;
-      trackImage.src = currentPlaylist[currentTrack].image;
-      audio.play().catch(error => console.error("Problème de lecture :", error));
-      playPauseBtn.innerHTML = "⏸";
+ 
+  static FOLDER_ICON = '📁';
+  static DEFAULT_FILE_ICON = '📄';
+ 
+  // ----------------------------------------------------------
+  //  Constructeur
+  // ----------------------------------------------------------
+  constructor(selector, options = {}) {
+    this.root = typeof selector === 'string'
+      ? document.querySelector(selector)
+      : selector;
+ 
+    if (!this.root) throw new Error(`GitHubExplorer: conteneur "${selector}" introuvable.`);
+ 
+    this.repos       = options.repos || [];
+    this.token       = options.token || null;
+    this.activeRepo  = options.defaultRepo || this.repos[0] || null;
+ 
+    // Etat de navigation : pile d'historique { path, url }
+    this._navStack   = [];      // historique des dossiers
+    this._currentItems = [];    // items du dossier courant
+    this._selectedFile = null;  // fichier actuellement sélectionné
+ 
+    // Cache des données pour éviter des requêtes inutiles
+    this._cache = {};
   }
-
-  // ▶️ Play/Pause
-  playPauseBtn.addEventListener("click", function () {
-      if (audio.paused) {
-          audio.play();
-          playPauseBtn.innerHTML = "⏸";
+ 
+  // ----------------------------------------------------------
+  //  Point d'entrée
+  // ----------------------------------------------------------
+  init() {
+    this._buildShell();
+    if (this.activeRepo) this._switchRepo(this.activeRepo);
+  }
+ 
+  // ----------------------------------------------------------
+  //  Rendu du squelette HTML
+  // ----------------------------------------------------------
+  _buildShell() {
+    this.root.innerHTML = '';
+    this.root.classList.add('gh-explorer-wrapper');
+ 
+    /* ---- Onglets ---- */
+    const tabsEl = document.createElement('div');
+    tabsEl.className = 'gh-repo-tabs';
+ 
+    this.repos.forEach(repo => {
+      const tab = document.createElement('button');
+      tab.className  = 'gh-repo-tab' + (repo === this.activeRepo ? ' active' : '');
+      tab.dataset.repo = repo;
+      const [, name] = repo.split('/');
+      tab.innerHTML  = `<span class="tab-dot"></span>${name}`;
+      tab.addEventListener('click', () => this._switchRepo(repo));
+      tabsEl.appendChild(tab);
+    });
+ 
+    /* ---- Panneau principal ---- */
+    const panel = document.createElement('div');
+    panel.className = 'gh-panel';
+ 
+    // Barre de titre
+    panel.appendChild(this._buildTitlebar());
+ 
+    // Sidebar
+    this._sidebarEl = document.createElement('div');
+    this._sidebarEl.className = 'gh-sidebar';
+    this._sidebarEl.innerHTML = `
+      <div class="gh-sidebar-header">
+        EXPLORATEUR <span>⬡</span>
+      </div>
+      <div class="gh-file-tree" id="gh-tree"></div>
+    `;
+    panel.appendChild(this._sidebarEl);
+ 
+    // Zone de contenu
+    this._contentEl = document.createElement('div');
+    this._contentEl.className = 'gh-content';
+    this._contentEl.innerHTML = `
+      <div class="gh-content-header">
+        <span class="open-file-icon">📂</span>
+        <button class="gh-content-tab active" data-view="readme">README</button>
+        <button class="gh-content-tab"        data-view="info">Infos repo</button>
+      </div>
+      <div id="gh-readme" class="gh-readme-zone">
+        <div class="gh-readme-placeholder">
+          <span class="ph-icon">📂</span>
+          Sélectionne un dépôt pour commencer
+        </div>
+      </div>
+      <div id="gh-info" class="gh-info-zone" style="display:none;"></div>
+    `;
+    panel.appendChild(this._contentEl);
+ 
+    // Références DOM utiles
+    this._treeEl   = panel.querySelector('#gh-tree');
+    this._readmeEl = panel.querySelector('#gh-readme');
+    this._infoEl   = panel.querySelector('#gh-info');
+ 
+    // Onglets README / Infos
+    panel.querySelectorAll('.gh-content-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        panel.querySelectorAll('.gh-content-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const view = btn.dataset.view;
+        this._readmeEl.style.display = view === 'readme' ? '' : 'none';
+        this._infoEl.style.display   = view === 'info'   ? '' : 'none';
+      });
+    });
+ 
+    this.root.appendChild(tabsEl);
+    this.root.appendChild(panel);
+ 
+    this._tabsEl   = tabsEl;
+    this._panelEl  = panel;
+  }
+ 
+  _buildTitlebar() {
+    const bar = document.createElement('div');
+    bar.className = 'gh-titlebar';
+    bar.innerHTML = `
+      <div class="gh-titlebar-left">
+        <div class="gh-titlebar-dots">
+          <span class="gh-titlebar-dot red"></span>
+          <span class="gh-titlebar-dot yellow"></span>
+          <span class="gh-titlebar-dot green"></span>
+        </div>
+        <span class="gh-repo-name" id="gh-repo-label">—</span>
+      </div>
+      <div class="gh-repo-meta" id="gh-meta"></div>
+    `;
+    this._titlebarEl = bar;
+    return bar;
+  }
+ 
+  // ----------------------------------------------------------
+  //  Changement de repo actif
+  // ----------------------------------------------------------
+  async _switchRepo(repo) {
+    this.activeRepo = repo;
+    this._navStack  = [];
+ 
+    // Màj onglets
+    this._tabsEl.querySelectorAll('.gh-repo-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.repo === repo);
+    });
+ 
+    // Màj label barre titre
+    this._panelEl.querySelector('#gh-repo-label').textContent = repo;
+ 
+    // Réinitialisation UI
+    this._treeEl.innerHTML   = this._loader();
+    this._readmeEl.innerHTML = this._loader();
+    this._infoEl.innerHTML   = '';
+    this._panelEl.querySelector('#gh-meta').innerHTML = '';
+ 
+    // Chargements parallèles
+    await Promise.all([
+      this._loadDirectory(repo, '', null),
+      this._loadReadme(repo),
+      this._loadRepoInfo(repo),
+    ]);
+  }
+ 
+  // ----------------------------------------------------------
+  //  Chargement d'un dossier
+  // ----------------------------------------------------------
+  async _loadDirectory(repo, path, parentUrl) {
+    const cacheKey = `${repo}:${path}`;
+    let items;
+ 
+    if (this._cache[cacheKey]) {
+      items = this._cache[cacheKey];
+    } else {
+      const url = path
+        ? `https://api.github.com/repos/${repo}/contents/${path}`
+        : `https://api.github.com/repos/${repo}/contents`;
+      try {
+        const data = await this._fetch(url);
+        if (!Array.isArray(data)) throw new Error('Réponse inattendue de l\'API GitHub');
+        items = data;
+        this._cache[cacheKey] = items;
+      } catch (err) {
+        this._treeEl.innerHTML = this._errorHtml(err.message);
+        return;
+      }
+    }
+ 
+    // Tri : dossiers d'abord, puis fichiers (alpha dans chaque groupe)
+    items.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+ 
+    this._currentItems = items;
+    this._renderTree(items, path, parentUrl);
+  }
+ 
+  // ----------------------------------------------------------
+  //  Rendu de l'arborescence
+  // ----------------------------------------------------------
+  _renderTree(items, currentPath, parentUrl) {
+    const tree = this._treeEl;
+    tree.innerHTML = '';
+ 
+    // Breadcrumb
+    if (currentPath) {
+      tree.appendChild(this._buildBreadcrumb(currentPath));
+ 
+      // Bouton retour
+      const backBtn = document.createElement('button');
+      backBtn.className = 'gh-back-btn';
+      backBtn.innerHTML = '⬅️ Retour';
+      backBtn.addEventListener('click', () => {
+        const prev = this._navStack.pop();
+        if (prev) {
+          this._loadDirectory(this.activeRepo, prev.path, prev.parentUrl);
+        } else {
+          this._loadDirectory(this.activeRepo, '', null);
+        }
+      });
+      tree.appendChild(backBtn);
+    }
+ 
+    // Items
+    items.forEach(item => {
+      const el = document.createElement('div');
+      const isDir = item.type === 'dir';
+ 
+      el.className   = `gh-tree-item ${isDir ? 'gh-folder' : 'gh-file'}`;
+      el.title       = item.name;
+ 
+      const icon = isDir
+        ? GitHubExplorer.FOLDER_ICON
+        : this._getFileIcon(item.name);
+ 
+      el.innerHTML = `
+        <span class="gh-item-icon">${icon}</span>
+        <span class="gh-item-name">${item.name}</span>
+      `;
+ 
+      if (isDir) {
+        el.addEventListener('click', () => {
+          this._navStack.push({ path: currentPath, parentUrl });
+          this._loadDirectory(this.activeRepo, item.path, item.url);
+        });
       } else {
-          audio.pause();
-          playPauseBtn.innerHTML = "▶️";
+        el.addEventListener('click', () => {
+          // Déselectionner tous, sélectionner celui-ci
+          tree.querySelectorAll('.gh-tree-item').forEach(e => e.classList.remove('selected'));
+          el.classList.add('selected');
+          this._selectedFile = item;
+          this._showFilePreview(item);
+        });
       }
-  });
-
-  // ⏭️ Suivant
-  nextBtn.addEventListener("click", function () {
-      updateTrack(currentTrack + 1);
-  });
-
-  // ⏮️ Précédent
-  prevBtn.addEventListener("click", function () {
-      updateTrack(currentTrack - 1);
-  });
-
-  // 🔄 Changement automatique à la fin d'une musique
-  audio.addEventListener("ended", function () {
-      updateTrack(currentTrack + 1);
-  });
-
-  // 🎛️ Changement de Playlist
-  playlistSelect.addEventListener("change", function () {
-      currentPlaylist = playlists[this.value];
-      currentTrack = 0;
-      updateTrack(currentTrack);
-  });
-
-  // 🎵 Affichage du temps écoulé et total
-  audio.addEventListener("timeupdate", function () {
-      const currentTime = formatTime(audio.currentTime);
-      const duration = formatTime(audio.duration);
-      timeDisplay.innerText = `${currentTime} / ${duration}`;
-      const progress = (audio.currentTime / audio.duration) * 100;
-      progressBar.style.width = progress + "%";
-  });
-
-  function formatTime(seconds) {
-      const min = Math.floor(seconds / 60);
-      const sec = Math.floor(seconds % 60);
-      return `${min}:${sec < 10 ? "0" + sec : sec}`;
+ 
+      tree.appendChild(el);
+    });
+ 
+    if (items.length === 0) {
+      tree.innerHTML += '<div class="gh-readme-placeholder" style="height:80px;font-size:11px;">Dossier vide</div>';
+    }
   }
-
-  // 🔊 Barre de progression cliquable
-  progressContainer.addEventListener("click", function (e) {
-      const clickX = e.offsetX;
-      const width = progressContainer.clientWidth;
-      const duration = audio.duration;
-      audio.currentTime = (clickX / width) * duration;
-  });
-
-  // 🎵 Icône pour afficher/masquer le lecteur
-  musicIcon.addEventListener("click", function () {
-      isLocked = !isLocked;
-      musicBox.classList.toggle("active", isLocked);
-      musicIcon.classList.toggle("active", isLocked);
-  });
-
-  // 🚀 Cache la boîte si non verrouillée
-  document.querySelector(".music-widget").addEventListener("mouseleave", function () {
-      if (!isLocked) {
-          musicBox.classList.remove("active");
-          musicIcon.classList.remove("active");
+ 
+  // ----------------------------------------------------------
+  //  Breadcrumb
+  // ----------------------------------------------------------
+  _buildBreadcrumb(path) {
+    const bc  = document.createElement('div');
+    bc.className = 'gh-breadcrumb';
+ 
+    // Racine
+    const root = document.createElement('span');
+    root.className = 'gh-breadcrumb-item';
+    root.textContent = this.activeRepo.split('/')[1];
+    root.addEventListener('click', () => {
+      this._navStack = [];
+      this._loadDirectory(this.activeRepo, '', null);
+    });
+    bc.appendChild(root);
+ 
+    // Segments
+    const parts = path.split('/');
+    parts.forEach((part, i) => {
+      const sep = document.createElement('span');
+      sep.className = 'gh-breadcrumb-sep';
+      sep.textContent = '/';
+      bc.appendChild(sep);
+ 
+      const isLast = i === parts.length - 1;
+      const seg = document.createElement('span');
+      seg.className = isLast ? 'gh-breadcrumb-current' : 'gh-breadcrumb-item';
+      seg.textContent = part;
+ 
+      if (!isLast) {
+        const targetPath = parts.slice(0, i + 1).join('/');
+        seg.addEventListener('click', () => {
+          // Reconstruire la pile jusqu'à ce segment
+          this._navStack = this._navStack.slice(0, i + 1);
+          this._loadDirectory(this.activeRepo, targetPath, null);
+        });
       }
+ 
+      bc.appendChild(seg);
+    });
+ 
+    return bc;
+  }
+ 
+  // ----------------------------------------------------------
+  //  Aperçu d'un fichier (dans zone README)
+  // ----------------------------------------------------------
+  async _showFilePreview(item) {
+    this._readmeEl.style.display = '';
+    this._infoEl.style.display   = 'none';
+    this._panelEl.querySelectorAll('.gh-content-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === 'readme');
+    });
+ 
+    this._readmeEl.innerHTML = this._loader();
+ 
+    const ext = item.name.split('.').pop().toLowerCase();
+    const textExts = [
+      'md','txt','js','ts','py','php','html','css','scss','json',
+      'yaml','yml','toml','xml','sh','bat','ps1','sql','rb','go',
+      'rs','c','cpp','cs','java','env','gitignore','conf','cfg','ini'
+    ];
+    const imageExts = ['png','jpg','jpeg','gif','svg','webp','ico'];
+ 
+    if (imageExts.includes(ext)) {
+      this._readmeEl.innerHTML = `
+        <div style="text-align:center;padding:20px;">
+          <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">${item.name}</p>
+          <img src="${item.download_url}" alt="${item.name}"
+               style="max-width:100%;max-height:400px;border-radius:8px;border:1px solid rgba(255,255,255,0.07);">
+          <br>
+          <a href="${item.html_url}" target="_blank" class="gh-external-link" style="margin-top:14px;">
+            🔗 Voir sur GitHub
+          </a>
+        </div>`;
+      return;
+    }
+ 
+    if (textExts.includes(ext) && item.download_url) {
+      try {
+        const text = await this._fetchRaw(item.download_url);
+        if (ext === 'md') {
+          this._readmeEl.innerHTML = this._parseMarkdown(text);
+        } else {
+          this._readmeEl.innerHTML = `
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">${item.path}</p>
+            <pre><code>${this._escapeHtml(text)}</code></pre>
+            <a href="${item.html_url}" target="_blank" class="gh-external-link">🔗 Voir sur GitHub</a>`;
+        }
+      } catch {
+        this._readmeEl.innerHTML = `
+          <div class="gh-readme-placeholder">
+            <span class="ph-icon">⚠️</span>
+            Impossible de charger le fichier.
+            <a href="${item.html_url}" target="_blank" class="gh-external-link" style="margin-top:8px;">🔗 Voir sur GitHub</a>
+          </div>`;
+      }
+    } else {
+      this._readmeEl.innerHTML = `
+        <div class="gh-readme-placeholder">
+          <span class="ph-icon">${this._getFileIcon(item.name)}</span>
+          <span style="font-size:12px;">${item.name}</span>
+          <a href="${item.html_url}" target="_blank" class="gh-external-link" style="margin-top:10px;">🔗 Ouvrir sur GitHub</a>
+        </div>`;
+    }
+  }
+ 
+  // ----------------------------------------------------------
+  //  Chargement du README
+  // ----------------------------------------------------------
+  async _loadReadme(repo) {
+    this._readmeEl.innerHTML = this._loader();
+    const url = `https://api.github.com/repos/${repo}/readme`;
+ 
+    try {
+      const data = await this._fetch(url);
+      const raw  = await this._fetchRaw(data.download_url);
+      this._readmeEl.innerHTML = this._parseMarkdown(raw);
+    } catch {
+      this._readmeEl.innerHTML = `
+        <div class="gh-readme-placeholder">
+          <span class="ph-icon">📭</span>
+          Aucun README disponible pour ce dépôt.
+        </div>`;
+    }
+  }
+ 
+  // ----------------------------------------------------------
+  //  Chargement des infos du repo
+  // ----------------------------------------------------------
+  async _loadRepoInfo(repo) {
+    try {
+      const [info, commits] = await Promise.all([
+        this._fetch(`https://api.github.com/repos/${repo}`),
+        this._fetch(`https://api.github.com/repos/${repo}/commits?per_page=5`).catch(() => [])
+      ]);
+ 
+      // Barre de titre — métadonnées
+      const meta = this._panelEl.querySelector('#gh-meta');
+      meta.innerHTML = `
+        <span class="gh-meta-item stars">⭐ ${info.stargazers_count}</span>
+        ${info.language ? `<span class="gh-meta-item lang">◉ ${info.language}</span>` : ''}
+        <span class="gh-meta-item commit">↻ ${this._relativeTime(info.pushed_at)}</span>
+      `;
+ 
+      // Panel info
+      const lang  = info.language || '—';
+      const since = this._relativeTime(info.created_at);
+      const updated = this._relativeTime(info.pushed_at);
+ 
+      let commitsHtml = '';
+      if (Array.isArray(commits) && commits.length) {
+        commitsHtml = commits.map(c => `
+          <div class="gh-commit-item">
+            <span class="gh-commit-sha">${c.sha.slice(0, 7)}</span>
+            <span class="gh-commit-msg">${this._escapeHtml(c.commit.message.split('\n')[0])}</span>
+            <span class="gh-commit-date">${this._relativeTime(c.commit.author.date)}</span>
+          </div>`).join('');
+      }
+ 
+      this._infoEl.innerHTML = `
+        <div class="gh-info-title">${info.full_name}</div>
+        <div class="gh-info-desc">${info.description ? this._escapeHtml(info.description) : '<em style="color:var(--text-muted)">Aucune description</em>'}</div>
+ 
+        <div class="gh-info-stats">
+          <span class="gh-stat-badge stars">⭐ ${info.stargazers_count} stars</span>
+          <span class="gh-stat-badge forks">🍴 ${info.forks_count} forks</span>
+          ${info.language ? `<span class="gh-stat-badge lang">◉ ${lang}</span>` : ''}
+          <span class="gh-stat-badge issues">⚠ ${info.open_issues_count} issues</span>
+        </div>
+ 
+        <div class="gh-info-section-title">INFORMATIONS</div>
+        <div style="font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:5px;font-family:var(--font-body,'Poppins',sans-serif);">
+          <span>📅 Créé : <strong style="color:var(--text-primary)">${since}</strong></span>
+          <span>🔄 Mis à jour : <strong style="color:var(--text-primary)">${updated}</strong></span>
+          <span>🌿 Branche par défaut : <strong style="color:var(--text-primary)">${info.default_branch}</strong></span>
+          ${info.license ? `<span>📜 Licence : <strong style="color:var(--text-primary)">${info.license.spdx_id}</strong></span>` : ''}
+          <span>📦 Taille : <strong style="color:var(--text-primary)">${this._formatSize(info.size)}</strong></span>
+        </div>
+ 
+        ${commitsHtml ? `
+          <div class="gh-info-section-title">COMMITS RÉCENTS</div>
+          <div class="gh-recent-commits">${commitsHtml}</div>` : ''}
+ 
+        <div style="margin-top:18px;">
+          <a href="${info.html_url}" target="_blank" class="gh-external-link">🔗 Ouvrir sur GitHub</a>
+        </div>
+      `;
+    } catch (err) {
+      this._infoEl.innerHTML = this._errorHtml(err.message);
+    }
+  }
+ 
+  // ----------------------------------------------------------
+  //  Fetch avec headers (optionnel token)
+  // ----------------------------------------------------------
+  async _fetch(url) {
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (this.token) headers['Authorization'] = `token ${this.token}`;
+ 
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      if (res.status === 403) throw new Error('Rate limit GitHub atteint. Réessaie dans quelques minutes.');
+      if (res.status === 404) throw new Error('Ressource introuvable (404). Dépôt privé ou inexistant ?');
+      throw new Error(`Erreur API GitHub : ${res.status}`);
+    }
+    return res.json();
+  }
+ 
+  async _fetchRaw(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Erreur lors du chargement (${res.status})`);
+    return res.text();
+  }
+ 
+  // ----------------------------------------------------------
+  //  Icône selon extension
+  // ----------------------------------------------------------
+  _getFileIcon(filename) {
+    const parts = filename.split('.');
+    if (parts.length < 2) return GitHubExplorer.DEFAULT_FILE_ICON;
+    const ext = parts.pop().toLowerCase();
+    return GitHubExplorer.FILE_ICONS[ext] || GitHubExplorer.DEFAULT_FILE_ICON;
+  }
+ 
+  // ----------------------------------------------------------
+  //  Parser Markdown ultra-léger (sans dépendance)
+  // ----------------------------------------------------------
+  _parseMarkdown(md) {
+    let html = md
+      // Escaper les caractères HTML
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+ 
+      // Blocs de code multi-lignes
+      .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+        `<pre><code class="lang-${lang}">${code.trim()}</code></pre>`)
+ 
+      // Titres
+      .replace(/^######\s(.+)$/gm, '<h6>$1</h6>')
+      .replace(/^#####\s(.+)$/gm, '<h5>$1</h5>')
+      .replace(/^####\s(.+)$/gm, '<h4>$1</h4>')
+      .replace(/^###\s(.+)$/gm, '<h3>$1</h3>')
+      .replace(/^##\s(.+)$/gm, '<h2>$1</h2>')
+      .replace(/^#\s(.+)$/gm, '<h1>$1</h1>')
+ 
+      // Ligne horizontale
+      .replace(/^[-*_]{3,}$/gm, '<hr style="border-color:rgba(255,255,255,0.1);margin:14px 0;">')
+ 
+      // Blockquote
+      .replace(/^>\s(.+)$/gm, '<blockquote>$1</blockquote>')
+ 
+      // Listes à puces
+      .replace(/^\s*[-*+]\s(.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+ 
+      // Listes numérotées
+      .replace(/^\s*\d+\.\s(.+)$/gm, '<li>$1</li>')
+ 
+      // Gras + italique
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      .replace(/_(.+?)_/g, '<em>$1</em>')
+ 
+      // Barré
+      .replace(/~~(.+?)~~/g, '<del>$1</del>')
+ 
+      // Code inline
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+ 
+      // Images
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+        '<img src="$2" alt="$1" loading="lazy">')
+ 
+      // Liens
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener">$1</a>')
+ 
+      // Retours à la ligne → paragraphes
+      .replace(/\n\n+/g, '</p><p>')
+ 
+    return `<p>${html}</p>`
+      // Nettoyage : éviter <p> autour des blocs
+      .replace(/<p>(<h[1-6]>)/g, '$1')
+      .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
+      .replace(/<p>(<ul>)/g, '$1')
+      .replace(/(<\/ul>)<\/p>/g, '$1')
+      .replace(/<p>(<pre>)/g, '$1')
+      .replace(/(<\/pre>)<\/p>/g, '$1')
+      .replace(/<p>(<blockquote>)/g, '$1')
+      .replace(/(<\/blockquote>)<\/p>/g, '$1')
+      .replace(/<p>(<hr[^>]*>)<\/p>/g, '$1')
+      .replace(/<p><\/p>/g, '');
+  }
+ 
+  // ----------------------------------------------------------
+  //  Utilitaires
+  // ----------------------------------------------------------
+  _relativeTime(dateStr) {
+    if (!dateStr) return '—';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const s = Math.floor(diff / 1000);
+    if (s < 60)   return 'à l\'instant';
+    const m = Math.floor(s / 60);
+    if (m < 60)   return `il y a ${m} min`;
+    const h = Math.floor(m / 60);
+    if (h < 24)   return `il y a ${h} h`;
+    const d = Math.floor(h / 24);
+    if (d < 30)   return `il y a ${d} j`;
+    const mo = Math.floor(d / 30);
+    if (mo < 12)  return `il y a ${mo} mois`;
+    return `il y a ${Math.floor(mo / 12)} an(s)`;
+  }
+ 
+  _formatSize(kb) {
+    if (kb < 1024) return `${kb} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+  }
+ 
+  _escapeHtml(str = '') {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+ 
+  _loader() {
+    return `<div class="gh-loader">
+      <div class="gh-spinner"></div>
+      Chargement…
+    </div>`;
+  }
+ 
+  _errorHtml(msg) {
+    return `<div class="gh-error">
+      <span class="gh-error-icon">⚠️</span>
+      <div>
+        <strong>Impossible de charger les données</strong><br>
+        <span style="font-size:11px;opacity:0.8;">${this._escapeHtml(msg)}</span>
+      </div>
+    </div>`;
+  }
+}
+ 
+/* ============================================================
+   AUTO-INIT : intégration déclarative via data-attributes
+   <div data-gh-explorer data-repos="user/repo1,user/repo2"></div>
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-gh-explorer]').forEach(el => {
+    const repos = (el.dataset.repos || '').split(',').map(r => r.trim()).filter(Boolean);
+    if (!repos.length) return;
+    const explorer = new GitHubExplorer(el, {
+      repos,
+      defaultRepo: repos[0],
+      token: el.dataset.token || null,
+    });
+    explorer.init();
   });
-
-  // 🎵 Lancement de la première musique par défaut
-  updateTrack(currentTrack);
 });
