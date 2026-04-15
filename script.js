@@ -607,10 +607,8 @@ const contentMaster = `
  */
  
 class GitHubExplorer {
- 
-  // ----------------------------------------------------------
+
   //  Icônes par extension / type de fichier
-  // ----------------------------------------------------------
   static FILE_ICONS = {
     // Langages
     js   : '🟨', ts   : '🔷', py   : '🐍', java : '☕',
@@ -637,10 +635,9 @@ class GitHubExplorer {
  
   static FOLDER_ICON = '📁';
   static DEFAULT_FILE_ICON = '📄';
- 
-  // ----------------------------------------------------------
+
   //  Constructeur
-  // ----------------------------------------------------------
+
   constructor(selector, options = {}) {
     this.root = typeof selector === 'string'
       ? document.querySelector(selector)
@@ -660,18 +657,16 @@ class GitHubExplorer {
     // Cache des données pour éviter des requêtes inutiles
     this._cache = {};
   }
- 
-  // ----------------------------------------------------------
+
   //  Point d'entrée
-  // ----------------------------------------------------------
+
   init() {
     this._buildShell();
     if (this.activeRepo) this._switchRepo(this.activeRepo);
   }
- 
-  // ----------------------------------------------------------
+
   //  Rendu du squelette HTML
-  // ----------------------------------------------------------
+
   _buildShell() {
     this.root.innerHTML = '';
     this.root.classList.add('gh-explorer-wrapper');
@@ -767,10 +762,9 @@ class GitHubExplorer {
     this._titlebarEl = bar;
     return bar;
   }
- 
-  // ----------------------------------------------------------
+
   //  Changement de repo actif
-  // ----------------------------------------------------------
+
   async _switchRepo(repo) {
     this.activeRepo = repo;
     this._navStack  = [];
@@ -796,10 +790,9 @@ class GitHubExplorer {
       this._loadRepoInfo(repo),
     ]);
   }
- 
-  // ----------------------------------------------------------
+
   //  Chargement d'un dossier
-  // ----------------------------------------------------------
+
   async _loadDirectory(repo, path, parentUrl) {
     const cacheKey = `${repo}:${path}`;
     let items;
@@ -831,9 +824,8 @@ class GitHubExplorer {
     this._renderTree(items, path, parentUrl);
   }
  
-  // ----------------------------------------------------------
   //  Rendu de l'arborescence
-  // ----------------------------------------------------------
+
   _renderTree(items, currentPath, parentUrl) {
     const tree = this._treeEl;
     tree.innerHTML = '';
@@ -896,10 +888,9 @@ class GitHubExplorer {
       tree.innerHTML += '<div class="gh-readme-placeholder" style="height:80px;font-size:11px;">Dossier vide</div>';
     }
   }
- 
-  // ----------------------------------------------------------
+
   //  Breadcrumb
-  // ----------------------------------------------------------
+
   _buildBreadcrumb(path) {
     const bc  = document.createElement('div');
     bc.className = 'gh-breadcrumb';
@@ -942,9 +933,8 @@ class GitHubExplorer {
     return bc;
   }
  
-  // ----------------------------------------------------------
   //  Aperçu d'un fichier (dans zone README)
-  // ----------------------------------------------------------
+
   async _showFilePreview(item) {
     this._readmeEl.style.display = '';
     this._infoEl.style.display   = 'none';
@@ -1005,9 +995,8 @@ class GitHubExplorer {
     }
   }
  
-  // ----------------------------------------------------------
   //  Chargement du README
-  // ----------------------------------------------------------
+
   async _loadReadme(repo) {
     this._readmeEl.innerHTML = this._loader();
     const url = `https://api.github.com/repos/${repo}/readme`;
@@ -1025,9 +1014,8 @@ class GitHubExplorer {
     }
   }
  
-  // ----------------------------------------------------------
   //  Chargement des infos du repo
-  // ----------------------------------------------------------
+
   async _loadRepoInfo(repo) {
     try {
       const [info, commits] = await Promise.all([
@@ -1091,9 +1079,7 @@ class GitHubExplorer {
     }
   }
  
-  // ----------------------------------------------------------
   //  Fetch avec headers (optionnel token)
-  // ----------------------------------------------------------
   async _fetch(url) {
     const headers = { 'Accept': 'application/vnd.github.v3+json' };
     if (this.token) headers['Authorization'] = `token ${this.token}`;
@@ -1112,20 +1098,15 @@ class GitHubExplorer {
     if (!res.ok) throw new Error(`Erreur lors du chargement (${res.status})`);
     return res.text();
   }
- 
-  // ----------------------------------------------------------
+
   //  Icône selon extension
-  // ----------------------------------------------------------
   _getFileIcon(filename) {
     const parts = filename.split('.');
     if (parts.length < 2) return GitHubExplorer.DEFAULT_FILE_ICON;
     const ext = parts.pop().toLowerCase();
     return GitHubExplorer.FILE_ICONS[ext] || GitHubExplorer.DEFAULT_FILE_ICON;
   }
- 
-  // ----------------------------------------------------------
   //  Parser Markdown ultra-léger (sans dépendance)
-  // ----------------------------------------------------------
   _parseMarkdown(md) {
     let html = md
       // Escaper les caractères HTML
@@ -1196,9 +1177,7 @@ class GitHubExplorer {
       .replace(/<p><\/p>/g, '');
   }
  
-  // ----------------------------------------------------------
   //  Utilitaires
-  // ----------------------------------------------------------
   _relativeTime(dateStr) {
     if (!dateStr) return '—';
     const diff = Date.now() - new Date(dateStr).getTime();

@@ -658,7 +658,7 @@ a.lm-download,
   position: absolute;
   width: 20px;
   height: 20px;
-  background: url('images/Experience_Orb_Value_-32768-2.png') no-repeat center / contain;
+  background: url('images/Experience_Orb.png') no-repeat center / contain;
   border-radius: 50%;
   opacity: 1;
   transition: transform 0.1s linear, opacity 0.3s ease-out;
